@@ -38,8 +38,8 @@ In the bitstring class, the following operators are defined:<br>
 <tr><td> ^</td><td> bitwise exclusive or</td></tr>
 <tr><td> &</td><td> bitwise and</td></tr>
 <tr><td> |</td><td> bitwise or</td></tr>
-<tr><td> <<k</td><td>  rotate left k bit positions [not shift!]</td></tr>
-<tr><td> >>k</td><td>  rotate right k bit positions [not shift!]</td></tr>
+<tr><td> &lt;&lt;</td><td>  rotate left k bit positions [not shift!]</td></tr>
+<tr><td> &gt;&gt;k</td><td>  rotate right k bit positions [not shift!]</td></tr>
 <tr><td> *k</td><td> concatenate k copies</td></tr>
 <tr><td> int()</td><td> the bitstring as a big-endian number</td></tr>
 <tr><td> [sequence of indices and slices]</td><td>  the bitstring of the concatenated selected bits</td></tr>
@@ -56,11 +56,12 @@ In the bitstring class, the following functions are defined:
 </table>
 
 bitstring.py also implements the following functions:
+<table>
 <tr><td> c2bs() converts a character to an 8-bit bitstring</td></tr>
 <tr><td> s2bs() converts a string to a bitstring, using c2bs</td></tr>
 <tr><td> b3x takes a bitstring and produces a new bitstring by reversing each sequence of 8 bits,</td></tr>
    with any remaining bits also reversed;</td></tr>
    this can be used to compensate for the little-endian specification of SHA3 (see shatest.py)</td></tr>
-</ul>
+</table>
 
 bitstring.py also implements the plane class, specifically for SHA3
