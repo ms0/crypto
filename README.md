@@ -18,16 +18,18 @@ Examples:<br>
 bitstring('abc') -> 011000010110001001100011 [printed as 616263]<br>
 bitstring(0x37,7) -> 0110111 [printed as 37]<br>
 
-bitstring instances have the following attributes:<br>
- .x the bitstring interpreted as a big-endian integer<br>
- ._l the number of bits in the bitstring (same as len())<br>
- Specifically for use by SHA3, if ._l is 25*2**l for some integer l, then<br>
-  .b same as ._l<br>
-  .w ._l/25<br>
-  .l log(._l/25)<br>
+bitstring instances have the following attributes:
+<table>
+ <tr><td>.x</td><td>the bitstring interpreted as a big-endian integer</td></tr>
+ <tr><td>._l</td><td>the number of bits in the bitstring (same as len())</td></tr>
+ <tr>Specifically for use by SHA3, if ._l is 25*2**l for some integer l, then</tr>
+  <tr><td>.b</td><td>same as ._l</td></tr>
+  <tr><td>.w</td><td>._l/25</td></tr>
+  <tr><td>.l</td><td>log(._l/25)</td></tr>
+</table>
   
 In the bitstring class, the following operators are defined:<br>
-<ul>
+<table>
 <li> len() the length of the bitstring, in bits</li>
 <li> - negation mod 2**length</li>
 <li> ~ bitwise complement</li>
@@ -42,7 +44,7 @@ In the bitstring class, the following operators are defined:<br>
 <li> int() the bitstring as a big-endian number</li>
 <li> [sequence of indices and slices]  the bitstring of the concatenated selected bits</li>
 <li> [sequence of indices and slices] = bitstring or integer  the selected bits are set</li>
-</ul>
+</table>
 
 In the bitstring class, the following functions are defined:
 <ul>
