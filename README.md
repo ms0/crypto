@@ -22,7 +22,7 @@ bitstring instances have the following attributes:
 <table>
  <tr><td>.x</td><td>the bitstring interpreted as a big-endian integer</td></tr>
  <tr><td>._l</td><td>the number of bits in the bitstring (same as len())</td></tr>
- <tr>Specifically for use by SHA3, if ._l is 25*2**l for some integer l, then</tr>
+ <tr><td></td><td>Specifically for use by SHA3, if ._l is 25*2**l for some integer l, then</td></tr>
   <tr><td>.b</td><td>same as ._l</td></tr>
   <tr><td>.w</td><td>._l/25</td></tr>
   <tr><td>.l</td><td>log(._l/25)</td></tr>
@@ -30,37 +30,37 @@ bitstring instances have the following attributes:
   
 In the bitstring class, the following operators are defined:<br>
 <table>
-<li> len() the length of the bitstring, in bits</li>
-<li> - negation mod 2**length</li>
-<li> ~ bitwise complement</li>
-<li> + addition mod 2**length</li>
-<li> - subtraction mod 2**length</li>
-<li> ^ bitwise exclusive or</li>
-<li> & bitwise and</li>
-<li> | bitwise or</li>
-<li> <<k  rotate left k bit positions [not shift!]</li>
-<li> >>k  rotate right k bit positions [not shift!]</li>
-<li> *k concatenate k copies</li>
-<li> int() the bitstring as a big-endian number</li>
-<li> [sequence of indices and slices]  the bitstring of the concatenated selected bits</li>
-<li> [sequence of indices and slices] = bitstring or integer  the selected bits are set</li>
+<tr><td> len()</td><td> the length of the bitstring, in bits</td></tr>
+<tr><td> -</td><td> negation mod 2**length</td></tr>
+<tr><td> ~</td><td> bitwise complement</td></tr>
+<tr><td> +</td><td> addition mod 2**length</td></tr>
+<tr><td> -</td><td> subtraction mod 2**length</td></tr>
+<tr><td> ^</td><td> bitwise exclusive or</td></tr>
+<tr><td> &</td><td> bitwise and</td></tr>
+<tr><td> |</td><td> bitwise or</td></tr>
+<tr><td> <<k</td><td>  rotate left k bit positions [not shift!]</td></tr>
+<tr><td> >>k</td><td>  rotate right k bit positions [not shift!]</td></tr>
+<tr><td> *k</td><td> concatenate k copies</td></tr>
+<tr><td> int()</td><td> the bitstring as a big-endian number</td></tr>
+<tr><td> [sequence of indices and slices]</td><td>  the bitstring of the concatenated selected bits</td></tr>
+<tr><td> [sequence of indices and slices] = bitstring or integer </td><td> the selected bits are set</td></tr>
 </table>
 
 In the bitstring class, the following functions are defined:
-<ul>
-<li> .concat(sequence of bitstrings and 0s and 1s)</li>
-   returns the bitstring resulting from concatenating the bitstring with the sequence of bits and bitstrings</li>
-<li> .tacnoc(sequence of bitstrings and 0s and 1s)</li>
-   returns the bitstring resulting from concatenating the reversed sequence of bits and bitstrings with the bitstring</li>
-<li> .trunc(n) equivalent to [:n], but checks that n <= ._l</li>
-</ul>
+<table>
+<tr><td> .concat(sequence of bitstrings and 0s and 1s)</td></tr>
+   returns the bitstring resulting from concatenating the bitstring with the sequence of bits and bitstrings</td></tr>
+<tr><td> .tacnoc(sequence of bitstrings and 0s and 1s)</td></tr>
+   returns the bitstring resulting from concatenating the reversed sequence of bits and bitstrings with the bitstring</td></tr>
+<tr><td> .trunc(n) equivalent to [:n], but checks that n <= ._l</td></tr>
+</table>
 
 bitstring.py also implements the following functions:
-<li> c2bs() converts a character to an 8-bit bitstring</li>
-<li> s2bs() converts a string to a bitstring, using c2bs</li>
-<li> b3x takes a bitstring and produces a new bitstring by reversing each sequence of 8 bits,</li>
-   with any remaining bits also reversed;</li>
-   this can be used to compensate for the little-endian specification of SHA3 (see shatest.py)</li>
+<tr><td> c2bs() converts a character to an 8-bit bitstring</td></tr>
+<tr><td> s2bs() converts a string to a bitstring, using c2bs</td></tr>
+<tr><td> b3x takes a bitstring and produces a new bitstring by reversing each sequence of 8 bits,</td></tr>
+   with any remaining bits also reversed;</td></tr>
+   this can be used to compensate for the little-endian specification of SHA3 (see shatest.py)</td></tr>
 </ul>
 
 bitstring.py also implements the plane class, specifically for SHA3
