@@ -48,7 +48,6 @@ for i in xrange(255) :
   R ^= (R&1)*0x11c;
   R >>= 1;
   rc = (rc << 1) | (R>>7);
-rc = bitstring(rc,256);
 
 def iota(A,i) :    # i is the round number
   w = A.x.w;
@@ -56,7 +55,7 @@ def iota(A,i) :    # i is the round number
   Z = sharray(A.x);
   RC = bitstring(0,w);
   for j in range(l+1) :
-    RC[(1<<j)-1] = rc[(j+7*i)%255];
+    RC[(1<<j)-1] = (rc >> (255-(j+7*i)%255))&1;
   for z in range(w) :
     Z[0,0,z] ^= RC[z];
   return Z;
@@ -106,7 +105,7 @@ def pad10_1(x,m) :
 
 def SHA3(x) :
   def X(M) :
-    return Keccak(2*x)(M.concat(bitstring(1,2)),x);
+    return Keccak(2*x)(M.concat(0,1),x);
   return X;
 
 def SHAKE(x) :
