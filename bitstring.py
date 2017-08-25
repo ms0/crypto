@@ -1,4 +1,4 @@
-# SHA-3 implementation
+# big-endian version
 
 import sys
 
@@ -219,6 +219,7 @@ class bitstring() :
     for k in key :
       if isint(k) :
         l -= 1;
+        if k<0 : k += self._l;
         self.x = self.x|(b>>k) if value&(1<<l) else self.x&~(b>>k);
       elif isinstance(k,slice) :    # should optimize for step==1
         for k in xrange(*k.indices(self._l)) :
