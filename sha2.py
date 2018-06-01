@@ -2,6 +2,12 @@
 
 from bitstring import *
 
+if sys.version_info[0] < 3 :
+  lmap = map;
+else :
+  lmap = lambda *x: list(map(*x));
+
+
 nprimes = 80;
 from rational import *
 from ffield import isprime
@@ -14,7 +20,7 @@ def primes() :
     p += 2;
 
 p = primes();
-P = [next(p) for i in range(nprimes)]
+P = [next(p) for i in xrange(nprimes)]
 
 def froot(x,r,b) :    # r is which root, b is number of fraction bits
   return int(rational(x<<(r*b))**rational(1,r))%(1<<b);
@@ -24,8 +30,8 @@ fcbrt = lambda x,b: froot(x,3,b);
 
 def printhex(a,b) :    # a is array of b-bit numbers
   w = 256/b;  # words per line
-  for i in range(0,len(a),w) :
-    print(' '.join('%%0%dx'%(b//4)%(a[i+j]) for j in range(w)));
+  for i in xrange(0,len(a),w) :
+    print(' '.join('%%0%dx'%(b//4)%(a[i+j]) for j in xrange(w)));
 
 def pad(M,      # message (as bitstring)
         L=None, # number of bits in max message length
@@ -54,7 +60,7 @@ Maj = lambda x,y,z: x&y|y&z|z&x;
 
 SHA1f = lambda t,x,y,z : Ch(x,y,z) if 0<=t<20 else Maj(x,y,z) if 40<=t<60 else Parity(x,y,z);
 
-K1 = map(lambda x: int(rational(x<<60)**rational(1,2)), (2,3,5,10));
+K1 = lmap(lambda x: int(rational(x<<60)**rational(1,2)), (2,3,5,10));
 SHA1K = lambda t: K1[t//20];
 
 H1 = [0x67452301,0xefcdab89,0x98badcfe,0x10325476,0xc3d2e1f0];
@@ -65,7 +71,7 @@ def SHA1(M) :
   wpb = m//w;
   M = split(pad(M),w);
   N = len(M)//wpb;
-  H = map(lambda x: bitstring(x,w),H1);
+  H = lmap(lambda x: bitstring(x,w),H1);
   for i in xrange(N) :
     Mi = M[i*wpb:(i+1)*wpb];
     W = Mi[0:16];
@@ -81,12 +87,12 @@ def SHA1(M) :
 ################################################################
 # SHA2
       
-K2 = map(lambda x: fcbrt(x,64),P[:80]);
+K2 = lmap(lambda x: fcbrt(x,64),P[:80]);
 
-H256 = map(lambda x: fsqrt(x,32),P[:8]);
-H384 = map(lambda x: fsqrt(x,64),P[8:16]);
-H512 = map(lambda x: fsqrt(x,64),P[:8]);
-H224 = map(lambda x: x%(1<<32),H384);    # low order 32 bits of H384!
+H256 = lmap(lambda x: fsqrt(x,32),P[:8]);
+H384 = lmap(lambda x: fsqrt(x,64),P[8:16]);
+H512 = lmap(lambda x: fsqrt(x,64),P[:8]);
+H224 = lmap(lambda x: x%(1<<32),H384);    # low order 32 bits of H384!
       
 S320 = lambda x : (x>>2)^(x>>13)^(x>>22);
 S321 = lambda x : (x>>6)^(x>>11)^(x>>25);
@@ -102,10 +108,10 @@ SHA224 = lambda M: SHA256(M,H224).trunc(224);
 
 def SHA2(M,H0,m,w,n,S0,S1,s0,s1) :
   wpb = m//w;
-  K = map(lambda x: x >> (64-w), K2[:n]);
+  K = lmap(lambda x: x >> (64-w), K2[:n]);
   M = split(pad(M,2*w),w);
   N = len(M)//wpb;
-  H = map(lambda x: bitstring(x,w), H0);
+  H = lmap(lambda x: bitstring(x,w), H0);
   for i in xrange(N) :
     Mi = M[i*wpb:(i+1)*wpb];
     W = Mi[0:16];
@@ -131,10 +137,10 @@ def SHA512(M,H0=H512) :
 def SHA512t(t,M) :
   if (not 0<t<512 or t==384) :
     raise valueError('t must be a positive integer < 512 and not 384');
-  return SHA512(M,map(
+  return SHA512(M,lmap(
       lambda x:x.x,
       split(SHA512(bitstring('SHA-512/%d'%(t)),
-                   map(lambda x: x^0xa5a5a5a5a5a5a5a5, H512)),64))).trunc(t);
+                   lmap(lambda x: x^0xa5a5a5a5a5a5a5a5, H512)),64))).trunc(t);
 
 SHA512_224 = lambda M: SHA512t(224,M);
 SHA512_256 = lambda M: SHA512t(256,M);
