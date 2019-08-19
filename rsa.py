@@ -3,7 +3,7 @@
 # encrypt
 # decrypt
 
-from rational import gcd, sqrt, xrange
+from rational import gcd, sqrt
 from ffield import isprime, bit_length
 
 try:
@@ -11,7 +11,13 @@ try:
 except :
   from random import randrange
 
+try:
+  xrange
+except :
+  xrange = range
+
 def xgcd(x,y) :
+  """Return g,c,d where g=cx+dy is the gcd of x and y"""
   u0,v0,u1,v1 = 1,0,0,1;
   while y :
     q = x//y;
@@ -19,17 +25,25 @@ def xgcd(x,y) :
   return x,u0,v0;
 
 def prime_in_range(a,b) :
+  """Return a random odd prime in the interval [a|1,b|1)"""
   while True :
     p = randrange(a|1,b|1,2);
     if isprime(p) :
       return p;
 
 class RSA() :
+  """RSA class
+Instance variables:
+  n: the RSA modulus, the product of two primes
+  e: the RSA public key
+  _d: the RSA private key
+Methods:
+  __init__, encrypt, decrypt"""
 
   def __init__(self,m,e=1+(1<<16)) :
-    # m is maximum modulus (m/2 <= n < m)
+    """Create an RSA modulus < m; try to use suggested public key e; compute private key"""
     if bit_length(m) < 32 :
-      raise ValueError('modulus too small');
+      raise ValueError('max modulus too small');
     s = int(sqrt(m<<7));
     while True :
       p = prime_in_range(s>>1,s);
@@ -54,7 +68,9 @@ class RSA() :
     self._d = d%p;
 
   def encrypt(self,m) :
+    """Return encrypted m"""
     return pow(m,self.e,self.n);
 
   def decrypt(self,m) :
+    """Return decrypted m"""
     return pow(m,self._d,self.n);
