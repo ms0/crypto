@@ -20,8 +20,8 @@ def xgcd(x,y) :
   """Return g,c,d where g=cx+dy is the gcd of x and y"""
   u0,v0,u1,v1 = 1,0,0,1;
   while y :
-    q = x//y;
-    x,u0,v0,y,u1,v1 = y,u1,v1,x-q*y,u0-q*u1,v0-q*v1;
+    q,r= divmod(x,y);
+    x,u0,v0,y,u1,v1 = y,u1,v1,r,u0-q*u1,v0-q*v1;
   return x,u0,v0;
 
 def prime_in_range(a,b) :
