@@ -1,7 +1,9 @@
 # crypto
 Crypto-related python routines, for exposition, not performance
 
-Dependency: rational.py from pymath repository (for computing constants in SHA2.py)
+Dependencies: rational.py and ffield.py from pymath repository (for computing constants in SHA2.py, for various uses in rsa.py)
+
+rsa.py contains code for creating and using RSA key pairs
 
 SHA2.py contains code for algorithms described in NIST.FIPS.180-4
 
