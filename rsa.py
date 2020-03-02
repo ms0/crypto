@@ -16,13 +16,13 @@ try:
 except :
   xrange = range
 
-def xgcd(x,y) :
-  """Return g,c,d where g=cx+dy is the gcd of x and y"""
-  u0,v0,u1,v1 = 1,0,0,1;
-  while y :
-    q,r= divmod(x,y);
-    x,u0,v0,y,u1,v1 = y,u1,v1,r,u0-q*u1,v0-q*v1;
-  return x,u0,v0;
+def xgcd(a,b) :
+  """Return g,c,d where g=ca+db is the gcd of a and b"""
+  c,d,e,f = 1,0,0,1;
+  while b :
+    q,r= divmod(a,b);
+    a,c,d,b,e,f = b,e,f,r,c-q*e,d-q*f;
+  return (-a,-c,-d) if a < 0 else (a,c,d);
 
 def prime_in_range(a,b) :
   """Return a random odd prime in the interval [a|1,b|1)"""
@@ -38,7 +38,7 @@ Instance variables:
   e: the RSA public key
   _d: the RSA private key
 Methods:
-  __init__, encrypt, decrypt"""
+  __init__, encrypt, decrypt, _pq"""
 
   def __init__(self,m,e=1+(1<<16)) :
     """Create an RSA modulus < m; try to use suggested public key e; compute private key"""
@@ -52,7 +52,7 @@ Methods:
       n = p*q;
       p -= 1;
       q -= 1;
-      p *= q//gcd(p,q);    # Carmichael totient
+      p *= q//gcd(p,q);    # reduced totient
       k = randrange(1,n);
       if pow(k,p,n) != 1 :
         continue;    # p or q not prime
@@ -74,3 +74,23 @@ Methods:
   def decrypt(self,m) :
     """Return decrypted m"""
     return pow(m,self._d,self.n);
+
+  def _pq(self) :
+    """From public and private keys, compute and return (p,q)"""
+    de1 = self._d*self.e-1;    # multiple of reduced totient
+    de1 //= de1&-de1;    # maximal odd divisor of same
+    for g in xrange(2,self.n) :    # find a square root of 1 neither 1 nor -1
+      gg = gcd(g,self.n);
+      if gg != 1 :
+        return (gg,self.n//gg);
+      g = pow(g,de1,self.n);
+      if g == 1 or g == self.n-1 :
+        continue;
+      while True :
+        g2 = pow(g,2,self.n);
+        if g2 == 1 :
+          g = gcd(g-1,self.n);
+          return (g,self.n//g);
+        elif g2 == self.n-1 :
+          break;
+        g = g2;
