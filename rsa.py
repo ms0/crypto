@@ -8,12 +8,12 @@ from ffield import isprime, bit_length
 
 try:
   randrange
-except :
+except Exception :
   from random import randrange
 
 try:
   xrange
-except :
+except Exception :
   xrange = range
 
 def xgcd(a,b) :
