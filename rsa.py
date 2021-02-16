@@ -31,7 +31,7 @@ def prime_in_range(a,b) :
     if isprime(p) :
       return p;
 
-class RSA() :
+class RSA(object) :
   """RSA class
 Instance variables:
   n: the RSA modulus, the product of two primes

@@ -34,7 +34,7 @@ is2power = lambda x: x&-x == x;
 # conversion to array by sharray(bitstring)
 
 
-class bitstring() :
+class bitstring(object) :
 
   def __init__(self,*args) :
     if not args :
@@ -67,36 +67,38 @@ class bitstring() :
   def __len__(self) :
     return self._l;
 
-  def __nonzero__(self) :
+  def __bool__(self) :
     return not not self.x;
 
+  __nonzero__ = __bool__
+
   def __eq__(self,other) :
-    if self.__class__ != other.__class__ or self._l != other._l :
+    if type(self) != type(other) or self._l != other._l :
       raise TypeError('not bitstring');
     return self.x == other.x;
 
   def __ne__(self,other) :
-    if self.__class__ != other.__class__ or self._l != other._l :
+    if type(self) != type(other) or self._l != other._l :
       raise TypeError('not bitstring');
     return self.x != other.x;
 
   def __gt__(self,other) :
-    if self.__class__ != other.__class__ or self._l != other._l :
+    if type(self) != type(other) or self._l != other._l :
       raise TypeError('not bitstring');
     return self.x > other.x;
 
   def __ge__(self,other) :
-    if self.__class__ != other.__class__ or self._l != other._l :
+    if type(self) != type(other) or self._l != other._l :
       raise TypeError('not bitstring');
     return self.x >= other.x;
 
   def __le__(self,other) :
-    if self.__class__ != other.__class__ or self._l != other._l :
+    if type(self) != type(other) or self._l != other._l :
       raise TypeError('not bitstring');
     return self.x <= other.x;
 
   def __lt__(self,other) :
-    if self.__class__ != other.__class__ or self._l != other._l :
+    if type(self) != type(other) or self._l != other._l :
       raise TypeError('not bitstring');
     return self.x < other.x;
 
@@ -123,7 +125,7 @@ class bitstring() :
   def __xor__(self,other) :
     if isint(other) and -1 <= other>>self._l <= 0 :
       return bitstring(self.x^other, self._l);
-    if self.__class__ != other.__class__ or self._l != other._l :
+    if type(self) != type(other) or self._l != other._l :
       raise TypeError('not bitstring');
     return bitstring(self.x^other.x, self._l);
 
@@ -132,7 +134,7 @@ class bitstring() :
   def __and__(self,other) :
     if isint(other) and -1 <= other>>self._l <= 0 :
       return bitstring(self.x&other, self._l);
-    if self.__class__ != other.__class__ or self._l != other._l :
+    if type(self) != type(other) or self._l != other._l :
       raise TypeError('not bitstring');
     return bitstring(self.x&other.x, self._l);
 
@@ -141,7 +143,7 @@ class bitstring() :
   def __or__(self,other) :
     if isint(other) and -1 <= other>>self._l <= 0 :
       return bitstring(self.x|other, self._l);
-    if self.__class__ != other.__class__ or self._l != other._l :
+    if type(self) != type(other) or self._l != other._l :
       raise TypeError('not bitstring');
     return bitstring(self.x|other.x, self._l);
 
@@ -150,7 +152,7 @@ class bitstring() :
   def __add__(self,other) :
     if isint(other) and -1 <= other>>self._l <= 0 :
       return bitstring(self.x+other, self._l);
-    if self.__class__ != other.__class__ or self._l != other._l :
+    if type(self) != type(other) or self._l != other._l :
       raise TypeError('not bitstring');
     return bitstring(self.x+other.x, self._l);
 
@@ -159,14 +161,14 @@ class bitstring() :
   def __sub__(self,other) :
     if isint(other) and -1 <= other>>self._l <= 0 :
       return bitstring(self.x-other, self._l);
-    if self.__class__ != other.__class__ or self._l != other._l :
+    if type(self) != type(other) or self._l != other._l :
       raise TypeError('not bitstring');
     return bitstring(self.x-other.x,self._l);
 
   def __rsub__(self,other) :
     if isint(other) and -1 <= other>>self._l <= 0 :
       return bitstring(other-self.x, self._l);
-    if self.__class__ != other.__class__ or self._l != other._l :
+    if type(self) != type(other) or self._l != other._l :
       raise TypeError('not bitstring');
     return bitstring(other.x-self.x,self._l);
     
@@ -233,7 +235,7 @@ class bitstring() :
       if isint(other) and 0 <= other <= 1 :
         bs = (bs<<1) | other;
         ls += 1;
-      elif self.__class__ == other.__class__ :
+      elif type(self) == type(other) :
         bs = (bs<<other._l) | other.x;
         ls += other._l;
       else :
@@ -245,10 +247,10 @@ class bitstring() :
     ls = self._l;
     for other in others :
       if isint(other) and 0 <= other <= 1 :
-        bs = bs | (other<<ls);
+        bs |= other<<ls;
         ls += 1;
-      elif self.__class__ == other.__class__ :
-        bs = bs | (other.x<<ls);
+      elif type(self) == type(other) :
+        bs |= other.x<<ls;
         ls += other._l;
       else :
         raise TypeError('not bitstring');
@@ -286,7 +288,7 @@ class bitstring() :
 # a[x,y,z] is a bit that can be read and set
 # a.plane(i)
 
-class sharray() :
+class sharray(object) :
   def __init__(self,*args) :
     if len(args) == 0 :
       args = (0,0);
@@ -351,7 +353,7 @@ def b3x(b) :     # convert bitstream to bitstream for sha3 input/output
 # .x is bitstring for plane
 # [x,z] can be read and set
 
-class plane() :
+class plane(object) :
   def __init__(self,*args) :
     if len(args) == 1 :
       if isinstance(args[0],bitstring) and not args[0]._l%5 and is2power(args[0]._l//5) :
@@ -389,7 +391,7 @@ class plane() :
       raise IndexError('index out of range');
 
   def __xor__(self,other) :
-    if self.__class__ != other.__class__ :
+    if type(self) != type(other) :
       raise TypeError('not plane');
     return plane(self.x^other.x);
 
