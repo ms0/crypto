@@ -108,69 +108,99 @@ class bitstring(object) :
   def __neg__(self) :
     return bitstring(-self.x,self._l);
 
-  def __lshift__(self,n) :    # actually, rotate
+  def __ilshift__(self,n) :    # actually, rotate
     if not isint(n) :
-      raise TypeError('shift amount not integer');
+      return NotImplemented;
     n = n%self._l;
     if n < 0 : n += self._l;
-    return bitstring((self.x<<n)|(self.x>>(self._l-n)),self._l);
+    self.x = (self.x<<n)|(self.x>>(self._l-n));
+    return self;
 
-  def __rshift__(self,n) :    # actually, rotate
+  def __lshift__(self,n) :
+    return bitstring(self).__ilshift__(n);
+
+  def __irshift__(self,n) :    # actually, rotate
     if not isint(n) :
-      raise TypeError('shift amount not integer');
+      return NotImplemented;
     n = n%self._l;
     if n < 0 : n += self._l;
-    return bitstring((self.x>>n)|(self.x<<(self._l-n)),self._l);
+    self.x = (self.x>>n)|(self.x<<(self._l-n));
+    return self;
 
-  def __xor__(self,other) :
+  def __rshift__(self,n) :
+    return bitstring(self).__irshift__(n);
+
+  def __ixor__(self,other) :
     if isint(other) and -1 <= other>>self._l <= 0 :
       return bitstring(self.x^other, self._l);
     if type(self) != type(other) or self._l != other._l :
-      raise TypeError('not bitstring');
-    return bitstring(self.x^other.x, self._l);
+      return NotImplemented;
+    self.x ^= other.x;
+    return self;
+
+  def __xor__(self,other) :
+    return bitstring(self).__ixor__(other);
 
   __rxor__ = __xor__
 
-  def __and__(self,other) :
+  def __iand__(self,other) :
     if isint(other) and -1 <= other>>self._l <= 0 :
-      return bitstring(self.x&other, self._l);
-    if type(self) != type(other) or self._l != other._l :
-      raise TypeError('not bitstring');
-    return bitstring(self.x&other.x, self._l);
+      self.x &= other;
+    elif type(self) == type(other) and self._l == other._l :
+      self.x &= other.x;
+    else :
+      return NotImplemented;
+    return self;
+
+  def __and__(self,other) :
+    return bitstring(self).__iand__(other);
 
   __rand__ = __and__
 
-  def __or__(self,other) :
+  def __ior__(self,other) :
     if isint(other) and -1 <= other>>self._l <= 0 :
-      return bitstring(self.x|other, self._l);
-    if type(self) != type(other) or self._l != other._l :
-      raise TypeError('not bitstring');
-    return bitstring(self.x|other.x, self._l);
+      self.x |= other;
+    elif type(self) == type(other) and self._l == other._l :
+      self.x |= other.x;
+    else :
+      return NotImplemented;
+    return self;
+
+  def __or__(self,other) :
+    return bitstring(self).__ior__(other);
 
   __ror__ = __or__
 
-  def __add__(self,other) :
+  def __iadd__(self,other) :
     if isint(other) and -1 <= other>>self._l <= 0 :
-      return bitstring(self.x+other, self._l);
-    if type(self) != type(other) or self._l != other._l :
-      raise TypeError('not bitstring');
-    return bitstring(self.x+other.x, self._l);
+      self.x += other;
+    elif type(self) == type(other) and self._l == other._l :
+      self.x += other.x;
+    else :
+      return NotImplemented;
+    return self;
+
+  def __add__(self,other) :
+    return bitstring(self).__iadd__(other);
 
   __radd__ = __add__
 
-  def __sub__(self,other) :
+  def __isub__(self,other) :
     if isint(other) and -1 <= other>>self._l <= 0 :
-      return bitstring(self.x-other, self._l);
-    if type(self) != type(other) or self._l != other._l :
-      raise TypeError('not bitstring');
-    return bitstring(self.x-other.x,self._l);
+      self.x -= other;
+    elif type(self) == type(other) and self._l == other._l :
+      self.x -= other.x;
+    else :
+      return NotImplemented;
+    return self;
+
+  def __sub__(self,other) :
+    return bitstring(self).__isub__(other);
 
   def __rsub__(self,other) :
     if isint(other) and -1 <= other>>self._l <= 0 :
       return bitstring(other-self.x, self._l);
-    if type(self) != type(other) or self._l != other._l :
-      raise TypeError('not bitstring');
-    return bitstring(other.x-self.x,self._l);
+    return NotImplemented;
     
 
   def __getitem__(self,key) :
