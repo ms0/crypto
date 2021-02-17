@@ -5,6 +5,8 @@ tests = ['',
          'abc', 
          'abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq',
          'abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu',
+#         'a'*int(1e6),
+#         'abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno'*(1<<24),
         ]
 
 SHA3_224x = lambda x:b3x(SHA3_224(b3x(x)));
@@ -25,7 +27,12 @@ mds = ['SHA1',
        'SHA3_512x',
       ];
 
-for t in tests :
-  print("'%s'"%(t));
-  for md in mds :
-    print('%s: %s'%(md,globals()[md](bitstring(t))));
+def test(d,m) :    # digest, message
+  md = globals()[d];
+  print('%s: %s'%(d,md(bitstring(m))));
+
+if __name__ == '__main__' :
+  for t in tests :
+    print("'%s'"%(t) if len(t) <= 128 else '%s...%s'%(t[:64],t[-64:]));
+    for md in mds :
+      test(md,t);

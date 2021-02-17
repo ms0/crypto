@@ -386,6 +386,9 @@ def b3x(b) :     # convert bitstream to bitstream for sha3 input/output
 class plane(object) :
   def __init__(self,*args) :
     if len(args) == 1 :
+      if isinstance(args[0],plane) :
+        self.x = args[0].x;
+        return;
       if isinstance(args[0],bitstring) and not args[0]._l%5 and is2power(args[0]._l//5) :
         args = args[0].x, rlog2(args[0]._l//5);
       elif isinstance(args[0],int) :
@@ -420,9 +423,13 @@ class plane(object) :
     else :
       raise IndexError('index out of range');
 
+  def __ixor__(self,other) :
+    if type(self) == type(other) :
+      self.x ^= other.x;
+      return self;
+    raise NotImplemented;
+
   def __xor__(self,other) :
-    if type(self) != type(other) :
-      raise TypeError('not plane');
-    return plane(self.x^other.x);
+    return plane(self).__ixor__(other);
 
 _plane = plane
