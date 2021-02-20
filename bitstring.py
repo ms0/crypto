@@ -74,32 +74,32 @@ class bitstring(object) :
 
   def __eq__(self,other) :
     if type(self) != type(other) or self._l != other._l :
-      raise TypeError('not bitstring');
+      return NotImplemented;
     return self.x == other.x;
 
   def __ne__(self,other) :
     if type(self) != type(other) or self._l != other._l :
-      raise TypeError('not bitstring');
+      return NotImplemented;
     return self.x != other.x;
 
   def __gt__(self,other) :
     if type(self) != type(other) or self._l != other._l :
-      raise TypeError('not bitstring');
+      return NotImplemented;
     return self.x > other.x;
 
   def __ge__(self,other) :
     if type(self) != type(other) or self._l != other._l :
-      raise TypeError('not bitstring');
+      return NotImplemented;
     return self.x >= other.x;
 
   def __le__(self,other) :
     if type(self) != type(other) or self._l != other._l :
-      raise TypeError('not bitstring');
+      return NotImplemented;
     return self.x <= other.x;
 
   def __lt__(self,other) :
     if type(self) != type(other) or self._l != other._l :
-      raise TypeError('not bitstring');
+      return NotImplemented;
     return self.x < other.x;
 
   def __invert__(self) :
@@ -402,7 +402,7 @@ class plane(object) :
         raise TypeError('l must be positive integer');
       self.x = bitstring(args[0],5<<args[1]);
     else :
-      raise TypeError('too many args');
+      raise TypeError('must be 1 or 2 args');
 
   def __str__(self) :
     return str(self.x);
@@ -427,7 +427,7 @@ class plane(object) :
     if type(self) == type(other) :
       self.x ^= other.x;
       return self;
-    raise NotImplemented;
+    return NotImplemented;
 
   def __xor__(self,other) :
     return plane(self).__ixor__(other);
