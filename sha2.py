@@ -1,12 +1,15 @@
 # SHA1 and 2
 
-from bitstring import *
+import sys
 
 if sys.version_info[0] < 3 :
   lmap = map;
 else :
   lmap = lambda *x: list(map(*x));
+  xrange = range;
 
+from bitstring import bitstrings
+bitstring = bitstrings(64);
 
 nprimes = 80;
 from rational import *
@@ -39,17 +42,17 @@ def pad(M,      # message (as bitstring)
        ) :
   L = L or 64;
   m = m or 8*L;
-  k = (-1-len(M)-L)%m;
-  return M.concat(bitstring(1<<k,k+1)).concat(bitstring(len(M),L));
+  l = len(M);
+  k = (-1-l-L)%m;
+  return M.iconcat(bitstring(1<<k,k+1)).iconcat(bitstring(l,L));
 
 def split(M,w) :    # split padded message M into words with wordsize w
   return [M[i:i+w] for i in xrange(0,len(M),w)];
 
 def concat(H) :
-  x = bitstring();
-  for h in H :
-    x = x.concat(h);
-  return x;
+  for h in H[1:] :
+    H[0].iconcat(h);
+  return H[0];
 
 ################################################################
 # SHA1
@@ -104,7 +107,7 @@ S641 = lambda x : (x>>14)^(x>>18)^(x>>41);
 s640 = lambda x : (x>>1)^(x>>8)^((x&~0x7f)>>7);
 s641 = lambda x : (x>>19)^(x>>61)^((x&~0x3f)>>6);
 
-SHA224 = lambda M: SHA256(M,H224).trunc(224);
+SHA224 = lambda M: SHA256(M,H224).itrunc(224);
 
 def SHA2(M,H0,m,w,n,S0,S1,s0,s1) :
   wpb = m//w;
@@ -129,7 +132,7 @@ def SHA2(M,H0,m,w,n,S0,S1,s0,s1) :
 def SHA256(M,H0=H256) :
   return SHA2(M,H0,512,32,64,S320,S321,s320,s321);
 
-SHA384 = lambda M: SHA512(M,H384).trunc(384);
+SHA384 = lambda M: SHA512(M,H384).itrunc(384);
       
 def SHA512(M,H0=H512) :
   return SHA2(M,H0,1024,64,80,S640,S641,s640,s641);
@@ -138,9 +141,9 @@ def SHA512t(t,M) :
   if (not 0<t<512 or t==384) :
     raise valueError('t must be a positive integer < 512 and not 384');
   return SHA512(M,lmap(
-      lambda x:x.x,
+      int,
       split(SHA512(bitstring('SHA-512/%d'%(t)),
-                   lmap(lambda x: x^0xa5a5a5a5a5a5a5a5, H512)),64))).trunc(t);
+                   lmap(lambda x: x^0xa5a5a5a5a5a5a5a5, H512)),64))).itrunc(t);
 
 SHA512_224 = lambda M: SHA512t(224,M);
 SHA512_256 = lambda M: SHA512t(256,M);

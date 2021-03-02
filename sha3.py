@@ -1,62 +1,176 @@
 # SHA-3 implementation
 
-from bitstring import *
+import sys
+
+if sys.version_info[0] >= 3 :
+  xrange = range;
+
+from bitstring import bitstrings
+bitstring=bitstrings(64);
+
+from math import log
+rlog2 = lambda x: int(round(log(x,2)));
+is2power = lambda x: x&-x == x;
+
+################################################################
+# sha3 array
+# a.x is bitstring for array
+# a[x,y,z] is a bit that can be read and set
+# a.plane(i)
+
+class sharray(object) :
+  """SHA3 array class"""
+
+  def __init__(self,arg) :
+    """Create a sha3 state array from a sharray or bitstring; sharray is copied"""
+    if isinstance(arg,sharray) :
+      self.x = type(arg.x)(arg.x);    # copy bitstring
+    elif type(type(arg)) == bitstrings :
+      # assume not arg._l%25 and is2power(arg._l//25)
+      self.x = arg;    # don't copy bitstring
+    else :
+      raise TypeError('arg must be sharray or bitstring of compatible size');
+
+  def __str__(self) :
+    """Return a string representing sharray self"""
+    return str(self.x);
+
+  def __repr__(self) :
+    """Return a string representing sharray self"""
+    return 'sharray('+str(self.x)+')';
+
+  def __getitem__(self,key) :
+    """Get the keyth bit of state array self; key is x,y,z"""
+    x,y,z = key;
+    if 0 <= x < 5 and 0 <= y < 5 and 0 <= z < self.x._l//25 :
+      return self.x[self.x._l//25*(5*y+x)+z];
+    raise IndexError('sharray index out of range');
+
+  def __setitem__(self,key,b) :
+    """Set the keyth bit of state array self; key is x,y,z"""
+    x,y,z = key;
+    if 0 <= x < 5 and 0 <= y < 5 and 0 <= z < self.x._l//25 :
+      self.x[self.x._l//25*(5*y+x)+z] = b;
+    else :
+      raise IndexError('sharray index out of range');
+
+  def plane(self,i) :
+    """Return a copy of the ith plane of state array self"""
+    x = self.x;
+    p = x._l//5;
+    io = p*i;
+    return plane(x[io:io+p]);
+
+################################################################
+# sha3 plane
+# .x is bitstring for plane
+# [x,z] can be read and set
+
+class plane(object) :
+  """SHA3 plane class"""
+
+  def __init__(self,arg) :
+    """Create a sha3 plane from a plane or a bitstring; bitstring is not copied"""
+    if isinstance(arg,plane) :
+      self.x = type(arg.x)(arg.x);    # copy bitstring
+    elif type(type(arg)) == bitstrings :
+      # assume not arg._l%5 and is2power(arg._l//5)
+      self.x = arg;    # don't copy bitstring
+    else :
+      raise TypeError('arg must be plane or bitstring of compatible size');
+
+  def __str__(self) :
+    """Return a string representing plane self"""
+    return str(self.x);
+
+  def __repr__(self) :
+    """Return a string representing plane self"""
+    return 'plane('+str(self.x)+')';
+
+  def __getitem__(self,key) :
+    """Return the keyth bit of plane self, addressed as x,z"""
+    x,z = key;
+    s = self.x;
+    m = s._l//5;
+    if 0 <= z < m :
+      return s[m*x+z];
+    raise IndexError('index out of range');
+
+  def __setitem__(self,key,b) :
+    """Set the keyth bit of plane self to b, addressed as x,z"""
+    x,z = key;
+    s = self.x;
+    m = s._l//5;
+    if 0 <= z < m :
+      s[m*x+z] = b;
+    else :
+      raise IndexError('index out of range');
+
+  def __xor__(self,other) :
+    """Bitwise xor other to self, both planes; left plane is munged!"""
+    try :
+      self.x ^= other.x;
+      return self;
+    except Exception :
+      return NotImplemented;
+
+################################################################
+# SHA3
 
 def theta(A) :
   C = A.plane(0) ^ A.plane(1) ^ A.plane(2) ^ A.plane(3) ^ A.plane(4);
-  D = plane(C.x);
-  w = A.x.w;    # lane size
-  for x in range(5) :
-    for z in range(w) :
+  D = plane(C);
+  w = A.x._l//25;    # lane size
+  for x in xrange(5) :
+    for z in xrange(w) :
       D[x,z] = C[(x-1)%5,z] ^ C[(x+1)%5,(z-1)%w];
-  for x in range(5) :
-    for y in range(5) :
-      for z in range(w) :
+  for x in xrange(5) :
+    for y in xrange(5) :
+      for z in xrange(w) :
         A[x,y,z] ^= D[x,z];
   return A;
 
 def rho(A) :
-  w = A.x.w;
-  Z = sharray(A.x);
+  w = A.x._l//25;
+  Z = sharray(A);
   x,y = 1,0;
-  for t in range(24) :
-    for z in range(w) :
+  for t in xrange(24) :
+    for z in xrange(w) :
       Z[x,y,z] = A[x,y,(z-(t+1)*(t+2)//2)%w];
     x,y = y,(2*x+3*y)%5;
   return Z;
 
 def pi(A) :
-  w = A.x.w;
-  Z = sharray(A.x);
-  for x in range(5) :
-    for y in range(5) :
-      for z in range(w) :
+  w = A.x._l//25;
+  Z = sharray(A);
+  for x in xrange(5) :
+    for y in xrange(5) :
+      for z in xrange(w) :
         Z[x,y,z] = A[(x+3*y)%5,x,z];
   return Z;
 
 def chi(A) :
-  Z = sharray(A.x);
-  for x in range(5) :
-    for y in range(5) :
-      for z in range(A.x.w) :
+  Z = sharray(A);
+  for x in xrange(5) :
+    for y in xrange(5) :
+      for z in xrange(A.x._l//25) :
         Z[x,y,z] ^= (A[(x+1)%5,y,z] ^ 1) & A[(x+2)%5,y,z];
   return Z;
 
 rc = 1;
 R = 0x80;
 for i in xrange(255) :
-  R ^= (R&1)*0x11c;
-  R >>= 1;
+  R = (R^((R&1)*0x11c)) >> 1;
   rc = (rc << 1) | (R>>7);
 
 def iota(A,i) :    # i is the round number
-  w = A.x.w;
+  w = A.x._l//25;
   l = rlog2(w);
-  Z = sharray(A.x);
+  Z = sharray(A);
   RC = bitstring(0,w);
-  for j in range(l+1) :
+  for j in xrange(l+1) :
     RC[(1<<j)-1] = (rc >> (255-(j+7*i)%255))&1;
-  for z in range(w) :
+  for z in xrange(w) :
     Z[0,0,z] ^= RC[z];
   return Z;
 
@@ -68,7 +182,7 @@ def Keccak_p(b,n) :    # b bit strings, n rounds
   l = rlog2(w);
   def X(S) :    # S is a b-bit string
     A = sharray(S);
-    for i in range(12+2*l-n,12+2*l) :
+    for i in xrange(12+2*l-n,12+2*l) :
       A = Rnd(A,i);
     return A.x;
   return X;
@@ -81,17 +195,18 @@ def Keccak_f(b) :
 
 def SPONGE(f,b,pad,r) :    # f is function over b-bit strings, r is rate
   def X(N,d) :
-    P = N.concat(pad(r,len(N)));
+    P = N.iconcat(pad(r,len(N)));
     n = len(P)//r;
     c = b-r;
     S = bitstring(0,b);
-    for i in range(n) :
-      S = f(S^P[i*r:(i+1)*r].concat(bitstring(0,c)));
+    for i in xrange(n) :
+      S ^= P[i*r:(i+1)*r].iconcat(bitstring(0,c));
+      S = f(S);
     Z = S.trunc(r);
     while len(Z) < d :
       S = f(S);
-      Z = Z.concat(S.trunc(r));
-    return Z.trunc(d);
+      Z = Z.iconcat(S.trunc(r));
+    return Z.itrunc(d);
   return X;
 
 def Keccak(c) :
@@ -105,18 +220,25 @@ def pad10_1(x,m) :
 
 def SHA3(x) :
   def X(M) :
-    return Keccak(2*x)(M.concat(0,1),x);
+    return Keccak(2*x)(M.iconcat(0,1),x);
   return X;
 
 def SHAKE(x) :
   def X(M,d) :
-    return Keccak(2*x)(M.concat(bitstring(0xf,4)),d);
+    return Keccak(2*x)(M.iconcat(bitstring(0xf,4)),d);
   return X
 
 def RawSHAKE(x) :
   def X(J,d) :
-    return Keccak(2*x)(J.concat(bitstring(3,2),d));
+    return Keccak(2*x)(J.iconcat(bitstring(3,2),d));
   return X;
+
+def b3x(b) :
+  """transform string-based bitstring for sha3 input/output"""
+  l = b._l;
+  for i in xrange(0,l+7,8) :
+    b[i:i+8] = b[i+7:i-1 if i else None:-1];
+  return b;
 
 SHA3_224 = SHA3(224);
 SHA3_256 = SHA3(256);
