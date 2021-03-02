@@ -92,15 +92,16 @@ def _fillr(self,b,other) :
 ################################################################
 
 # ._l is number of bits (also len())
-# if ._l is 25 times an integral power of 2:
-#   .w is b/25 [lane size]
-#   .l is log2(w)
-# [i] is ith bit where [0] is the leftmost bit
-# [i:j] is ith to jth bit, as (j-i) length bitstring
-# conversion to array by sharray(bitstring)
+# [i] is ith bit where [0] is the leftmost bit as a length-1 bitstring
+# slice indexing is also allowed, again by bit
+# a comma-separated sequence of indices produces a bitstring which is
+#  the left-to-right concatenation of the bitstrings for each index
 # ._x is internal representation as either an int or a list of ints
-# _B is the maximum number of bits in each of those ints
+# ._B is the maximum number of bits in each of those ints
 # only the last (or only) int can hold fewer than _B bits
+# if ._x is an int, the lsb is the rightmost bit of the string
+# if ._x is a list, the rightmost bit of the bitstring is
+#   (._x[-1]>>(._B-1-._l%._B))&1
 
 def __init__(self,*args) :
   """Create a bitstring from an int and a length, or from another bitstring"""
