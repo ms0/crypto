@@ -235,8 +235,8 @@ def __neg__(self) :
   return type(self)(-int(self),self._l);
 
 def __pos__(self) :
-  """Return a copy of self"""
-  return type(self)(self);
+  """Return self"""
+  return self;
 
 def __ilshift__(self,n) :    # actually, rotate
   """Rotate left self by n bits"""
@@ -254,7 +254,7 @@ def __ilshift__(self,n) :    # actually, rotate
   return self;
 
 def __lshift__(self,n) :
-  return type(self)(self).__ilshift__(n);
+  return __ilshift__(type(self)(self),n);
 
 def __irshift__(self,n) :    # actually, rotate
   """Rotate right self by n bits"""
@@ -263,7 +263,6 @@ def __irshift__(self,n) :    # actually, rotate
   B = self._B;
   l = self._l;
   n %= l;
-  if n < 0 : n += l;
   if l <= B :
     self._x = ((self._x>>n)|(self._x<<(l-n)))&((1<<l)-1);
   else :
@@ -272,7 +271,7 @@ def __irshift__(self,n) :    # actually, rotate
   return self;
 
 def __rshift__(self,n) :
-  return type(self)(self).__irshift__(n);
+  return __irshift__(type(self)(self),n);
 
 def __ixor__(self,other) :
   """Bitwise xor other to self"""
@@ -306,7 +305,7 @@ def __ixor__(self,other) :
 
 def __xor__(self,other) :
   """Return bitwise xor of self and other"""
-  return type(self)(self).__ixor__(other);
+  return __ixor__(type(self)(self),other);
 
 __rxor__ = __xor__
 
@@ -341,7 +340,7 @@ def __iand__(self,other) :
 
 def __and__(self,other) :
   """Return bitwise and of self and other"""
-  return type(self)(self).__iand__(other);
+  return __iand__(type(self)(self),other);
 
 __rand__ = __and__
 
@@ -377,7 +376,7 @@ def __ior__(self,other) :
 
 def __or__(self,other) :
   """Return bitwise or of self and other"""
-  return type(self)(self).__ior__(other);
+  return __ior__(type(self)(self),other);
 
 __ror__ = __or__
 
@@ -396,7 +395,7 @@ def __iadd__(self,other) :
 
 def __add__(self,other) :
   """Return sum of self and other, discarding carry"""
-  return type(self)(self).__iadd__(other);
+  return __iadd__(type(self)(self),other);
 
 __radd__ = __add__
 
@@ -416,7 +415,7 @@ def __isub__(self,other) :
 
 def __sub__(self,other) :
   """Return self minus other, discarding carry"""
-  return type(self)(self).__isub__(other);
+  return __isub__(type(self)(self),other);
 
 def __rsub__(self,other) :
   """Return other minus self, discarding carry"""
@@ -692,7 +691,7 @@ def __imul__(self,n) :
 
 def __mul__(self,n) :
   """Return a bitstring comprising |n| copies of self, bitreversed if n < 0"""
-  return type(self)(self).__imul__(n);
+  return __imul__(type(self)(self),n);
 
 _bitstring = {};  # chunk -> bitstring
 
