@@ -1,3 +1,4 @@
+
 # SHA-3 implementation
 
 import sys
@@ -37,7 +38,7 @@ class sharray(object) :
 
   def __repr__(self) :
     """Return a string representing sharray self"""
-    return 'sharray('+str(self.x)+')';
+    return 'sharray('+repr(self.x)+')';
 
   def __getitem__(self,key) :
     """Get the keyth bit of state array self; key is x,y,z"""
@@ -85,7 +86,7 @@ class plane(object) :
 
   def __repr__(self) :
     """Return a string representing plane self"""
-    return 'plane('+str(self.x)+')';
+    return 'plane('+repr(self.x)+')';
 
   def __getitem__(self,key) :
     """Return the keyth bit of plane self, addressed as x,z"""
