@@ -40,6 +40,9 @@ def test1(bs) :
   m = (1<<l)-1;    # bitstring mask
   x = randrange(1<<l);
   b = bs(x,l);
+  ceq('v[0]==+v[0]',b);
+  ceq('0-v[0]==-v[0]',b);
+  ceq('v[0]^-1==~v[0]',b);
   ceq('len(v[0])==v[1]',b,l);
   ceq('int(v[0])==v[1]',b,x);
   ceq('v[0].concat(0,1)[:-2]==v[0]',b);
@@ -74,7 +77,6 @@ def test1(bs) :
   ceq('int(v[0]+v[1])==v[2]',b,c,(x+y)&m);
   ceq('int(v[0]-v[1])==v[2]',b,c,(x-y)&m);
 
-
 def test2(b1,b2) :
   """test pairs of bitstring types"""
   l = randrange(1024);   # size of bitstring
@@ -82,6 +84,21 @@ def test2(b1,b2) :
   b = b1(x,l);
   c = b2(x,l);
   ceq('v[0]==v[1]',b,c);
+  ceq('v[0]<=v[1]',b,c);
+  ceq('not v[0]<v[1]',b,c);
+  ceq('v[0]<=v[1].concat(0)',b,c);
+  ceq('v[0]<v[1].concat(0)',b,c);
+  ceq('not v[0].concat(0)<=v[1]',b,c);
+  ceq('v[0]>=v[1]',b,c);
+  ceq('not v[0]>v[1]',b,c);
+  ceq('not v[0]>=v[1].concat(0)',b,c);
+  ceq('v[0].concat(0)>v[1]',b,c);
+  ceq('v[0].concat(0)>=v[1]',b,c);
+  if l :
+    ceq('not v[0]^1<v[1]',b,c);
+    ceq('not v[0]^1<=v[1]',b,c);
+    ceq('not v[0]^1>v[1]',b,c);
+    ceq('not v[0]^1>=v[1]',b,c);
   ceq('int(v[0]^v[1])==0',b,c);
   ceq('int(v[0]-v[1])==0',b,c);
   ceq('int(v[0]+-v[1])==0',b,c);

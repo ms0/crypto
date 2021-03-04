@@ -254,6 +254,7 @@ def __ilshift__(self,n) :    # actually, rotate
   return self;
 
 def __lshift__(self,n) :
+  """Return result of rotating self n bits left"""
   return __ilshift__(type(self)(self),n);
 
 def __irshift__(self,n) :    # actually, rotate
@@ -271,6 +272,7 @@ def __irshift__(self,n) :    # actually, rotate
   return self;
 
 def __rshift__(self,n) :
+  """Return result of rotating self n bits right"""
   return __irshift__(type(self)(self),n);
 
 def __ixor__(self,other) :
@@ -686,7 +688,6 @@ def __imul__(self,n) :
     y = type(self)(self);
     for _ in xrange(n-1) :
       self.iconcat(y);
-
   return self;
 
 def __mul__(self,n) :
