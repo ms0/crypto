@@ -617,6 +617,28 @@ def __concat__(self,*others) :
   """Return a new bitstring formed by concatenating the args, each a bit or a bitstring"""
   return __iconcat__(type(self)(self),*others);
 
+def __itacnoc__(self,*others) :
+  """Concatenate others to self on the left"""
+  x = int(self);
+  l = self._l;
+  for other in others :
+    if isint(other) and 0 <= other <= 1 :
+      x |= other<<l;
+      l += 1;
+    elif type(type(self)) == type(type(other)) :
+      x |= int(other)<<l;
+      l += other._l;
+    else :
+      raise TypeError('not bitstring');
+  B = self._B;
+  self._l = l;
+  if l <= B :
+    self._x = x;
+  else :
+    self._x = [0]*((l+B-1)//B);
+    _fill(self,x,False);
+  return self;
+  
 def __tacnoc__(self,*others) :    # concatenate backwards
   """Return a new bitstring formed by concatening the args in reverse order"""
   x = int(self);
@@ -755,7 +777,8 @@ class bitstrings(type) :
              __rsub__=__rsub__,
              iconcat=__iconcat__,
              concat=__concat__,
-#             tacnoc=__tacnoc__,
+             itacnoc=__itacnoc__,
+             tacnoc=__tacnoc__,
              itrunc=__itrunc__,
              trunc=__trunc__,
              copy=__copy__,

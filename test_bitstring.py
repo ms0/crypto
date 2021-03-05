@@ -54,10 +54,11 @@ def test1(bs) :
   if l :
     i = randrange(l);
     ceq('v[0]==v[0][:v[1]].concat(v[0][v[1]:])',b,i);
+    ceq('v[0]==v[0][v[1]:].tacnoc(v[0][:v[1]])',b,i);
     ceq('v[0]<<v[1]==v[0][v[1]:].concat(v[0][:v[1]])',b,i);
     ceq('v[0]<<v[1]==v[0]>>(len(v[0])-v[1])',b,i);
     ceq('v[0].trunc(v[1])==v[0][:v[1]]',b,i);
-    ceq('int(v[0].trunc(len(v[0])+v[1]))==int(v[0])<<v[1]',b,i);
+    ceq('v[0]<<v[1]==v[0][v[1]:].concat(v[0].trunc(v[1]))',b,i);
     j = randrange(l);
     if i > j : i,j=j,i;
     c = bs(b);    # copy of b
@@ -130,6 +131,8 @@ def timetest1(B) :
   timing('getalt',B,B,'b=bb(3**646,1024)','b[::2]');
   timing('*2',B,B,'b=bb(3**646,1024)','b*2');
   timing('b3x',B,B,'b=bb(3**646,1024)','b3x(b)');
+  timing('shift1',B,B,'b=bb(3**646,1024)','b<<=1');
+  timing('shifth',B,B,'b=bb(3**646,1024)','b<<=512');
 
 def timetest2(B,C) :
   timing('convert',B,C,'b=bb(3**646,1024)','bc(b)');
