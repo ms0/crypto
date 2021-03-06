@@ -264,6 +264,7 @@ def __irshift__(self,n) :    # actually, rotate
   B = self._B;
   l = self._l;
   n %= l;
+  if not n : return self;
   if l <= B :
     self._x = ((self._x>>n)|(self._x<<(l-n)))&((1<<l)-1);
   else :
