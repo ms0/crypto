@@ -44,7 +44,7 @@ class sharray(object) :
     """Get the keyth bit of state array self; key is x,y,z"""
     x,y,z = key;
     if 0 <= x < 5 and 0 <= y < 5 and 0 <= z < self.x._l//25 :
-      return self.x[self.x._l//25*(5*y+x)+z];
+      return int(self.x[self.x._l//25*(5*y+x)+z]);
     raise IndexError('sharray index out of range');
 
   def __setitem__(self,key,b) :
@@ -94,7 +94,7 @@ class plane(object) :
     s = self.x;
     m = s._l//5;
     if 0 <= z < m :
-      return s[m*x+z];
+      return int(s[m*x+z]);
     raise IndexError('index out of range');
 
   def __setitem__(self,key,b) :
@@ -120,15 +120,12 @@ class plane(object) :
 
 def theta(A) :
   C = A.plane(0) ^ A.plane(1) ^ A.plane(2) ^ A.plane(3) ^ A.plane(4);
-  D = plane(C);
   w = A.x._l//25;    # lane size
   for x in xrange(5) :
     for z in xrange(w) :
-      D[x,z] = C[(x-1)%5,z] ^ C[(x+1)%5,(z-1)%w];
-  for x in xrange(5) :
-    for y in xrange(5) :
-      for z in xrange(w) :
-        A[x,y,z] ^= D[x,z];
+      Dxz = C[(x-1)%5,z] ^ C[(x+1)%5,(z-1)%w];
+      for y in xrange(5) :
+        A[x,y,z] ^= Dxz;
   return A;
 
 def rho(A) :
