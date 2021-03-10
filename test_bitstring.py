@@ -124,6 +124,8 @@ R.seed(0);
 # (6) b3x
 
 def timetest1(B) :
+  timing('create',B,B,'x,y=3**646,1024','bb(x,y)');
+  timing('int',B,B,'b=bb(3**646,1024)','int(b)');
   timing('*-1',B,B,'b=bb(3**646,1024)','b*-1');
   timing('getone',B,B,'b=bb(3**646,1024)','b[0]');
   timing('getall',B,B,'b=bb(3**646,1024)','b[:]');

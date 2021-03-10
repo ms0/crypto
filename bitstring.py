@@ -12,15 +12,62 @@ if sys.version_info[0] < 3 :
     """Return True iff an integer"""
     return isinstance(x,(int,long));
 
+  lmap = map;
+  
 else :
 
   def isint(x) :
     """Return True iff an integer"""
     return isinstance(x,int);
 
+  def lmap(f,*x) :
+    """Return list(map(f,*x))"""
+    return list(map(f,*x));
+
   xrange = range;
 
+try :
+  int.bit_length;
+  bit_length = lambda n : n.bit_length();
+except Exception :
+  import math
+  def bit_length(n) :
+    n = abs(n);
+    b = 0;
+    while n :
+      try :
+        l = int(math.log(n,2));
+        while n >> l : l += 1;
+      except OverflowError :
+        l = sys.float_info.max_exp-1;
+      b += l
+      n >>= l;
+    return b;
+
 inf = float('inf');
+
+def chunkify(x,l,B) :
+  """return a list of B-sized chunks for int x of length l"""
+  n = (l+B-1)//B;    # number of B-chunks
+  y = [0]*n;
+  y[-1] = x << ((B-l)%B);
+  kf = 0 if B > 128 else bit_length(256//B-1);
+  for k in xrange(bit_length(n-1),kf,-1) :
+    c = 1<<(k-1);    # chunk increment
+    s = c*B;         # size of chunks being created
+    m = (1<<s)-1;    # mask
+    for i in xrange(n-1,c-1 if (n//c)&1 else -1,-c<<1) :
+      y[i-c] = y[i] >> s;
+      y[i] &= m;
+  if kf :
+    m = (1<<B)-1;
+    for i in xrange(n-1,-1,-1<<kf) :
+      x = y[i];
+      while x :
+        y[i] = x&m;
+        x >>= B;
+        i -= 1;
+  return y;
 
 def _fill(self,x,mustzero=True) :
   """fill list self._x with value x of bitlength l"""
@@ -106,30 +153,27 @@ def _fillr(self,b,other) :
 def __init__(self,*args) :
   """Create a bitstring from an int and a length, or from another bitstring"""
   if not args :
-    args = 0,0;
+    self._x = self._l = 0;
+    return;
   B = self._B;
   if len(args) == 1 :
-    if isinstance(args[0], str) :
-      self._l = l = len(args[0])<<3;
-      if l <= B :
-        x = 0;
-        for c in args[0] :
-          x = (x<<8) | ord(c);
-        self._x = x;
-      else :
-        self._x = [0]*((l+B-1)//B);
-        for i,c in enumerate(args[0]) :
-          self[i<<3:(i+1)<<3] = ord(c);
+    a = args[0];
+    if isinstance(a,type(self)) :
+      self._l = l = a._l;
+      self._x = a._x[:] if l > B else a._x;
       return;
-    if type(type(args[0])) == bitstrings :
-      self._l = l = args[0]._l;
-      if B == args[0]._B :
-        self._x = int(args[0]) if l <= B else args[0]._x[:];
+    if isinstance(a, str) :
+      if B == 8 :
+        self._l = l = len(a)<<3;
+        self._x = lmap(ord,a);
+        if l <= B : self._x = l and self._x[0];
         return;
-      if l <= B :
-        self._x = int(args[0]);
-        return;
-      args = int(args[0]),l;    # this case could be optimized
+      else :
+        a = _bitstring[8](a);
+    if isinstance(type(a),bitstrings) :
+      self._x = self._l = 0;
+      __iconcat__(self,a);
+      return;
     else : raise TypeError('single arg must be bitstring')
   if len(args) > 2 :
     raise TypeError('too many args');
@@ -143,8 +187,7 @@ def __init__(self,*args) :
   if l <= B :
     self._x = x;
   else :
-    self._x = [0]*((l+B-1)//B);
-    _fill(self,x,False);
+    self._x = chunkify(x,l,B);
 
 def __copy__(self) :
   """Return a copy of self"""
@@ -156,11 +199,33 @@ def __int__(self) :
   l = self._l;
   if l <= B :
     return self._x;
-  x = 0;
-  l %= B;
-  for a in self._x :
-    x = (x<<B) | a;
-  return x>>(B-l) if l else x;
+  z = (B-l)%B;    # number of zeroes at end
+  x = self._x;
+  n = len(x);    # at least 2
+  o = 256//B;
+  if o > 1 :
+    y = [];
+    for k in xrange(n%o,n+o-1,o) :
+      n = 0;
+      for i in xrange(max(0,k-o),k) :
+        n = (n<<B) | x[i];
+      y.append(n);
+    n = len(y);
+    x = y;
+    B = o*B;
+  while n > 1 :
+    if n&1 :
+      y = x[:1];
+      r = xrange(1,n,2);
+    else :
+      y = [];
+      r = xrange(0,n,2);
+    for i in r :
+      y.append((x[i]<<B)|x[i+1]);
+    B <<= 1;
+    n = len(y);
+    x = y;
+  return y[0]>>z;
 
 def __repr__(self) :
   """Return a string representing the bitstring"""
@@ -185,11 +250,14 @@ def __eq__(self,other) :
   if type(type(self)) != type(type(other)) :
     return NotImplemented;
   return self._l == other._l and (
-    self._x == other._x if type(self) == type(other) else int(self) == int(other));
+    self._x == other._x if self._B == other._B else int(self) == int(other));
 
 def __ne__(self,other) :
   """Return True iff self and other are not the same bitstring"""
-  return not self.__eq__(other);
+  if type(type(self)) != type(type(other)) :
+    return NotImplemented;
+  return self._l != other._l or (
+    self._x != other._x if self._B == other._B else int(self) != int(other));
 
 def __lt__(self,other) :
   """Return True iff self is a proper initial substring of other"""
@@ -563,6 +631,9 @@ def __setitem__(self,key,value) :    # this makes bitstring mutable!
 
 def __iconcat__(self,*others) :
   """concat bits or bitstrings to self"""
+  if self in others :
+    c = type(self)(self);    # copy
+    others = tuple(o if o != self else c for o in others);
   B = self._B;
   if B<inf:  m = (1<<B)-1;
   x = self._x;
@@ -582,7 +653,7 @@ def __iconcat__(self,*others) :
           x.append(other<<(B-1));
       self._l = l = l+1;
       continue;
-    elif type(type(self)) == type(type(other)) :
+    elif isinstance(type(other),bitstrings) :
       oB = other._B;
       ol = other._l;
       nl = l+ol;
@@ -626,7 +697,7 @@ def __itacnoc__(self,*others) :
     if isint(other) and 0 <= other <= 1 :
       x |= other<<l;
       l += 1;
-    elif type(type(self)) == type(type(other)) :
+    elif isinstance(type(other),bitstrings) :
       x |= int(other)<<l;
       l += other._l;
     else :
@@ -648,7 +719,7 @@ def __tacnoc__(self,*others) :    # concatenate backwards
     if isint(other) and 0 <= other <= 1 :
       x |= other<<l;
       l += 1;
-    elif type(type(self)) == type(type(other)) :
+    elif isinstance(type(other),bitstrings) :
       x |= int(other)<<l;
       l += other._l;
     else :
@@ -802,3 +873,4 @@ class bitstrings(type) :
 
      
 bitstring = bitstrings();
+bitstrings(8);
