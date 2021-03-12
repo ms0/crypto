@@ -46,22 +46,31 @@ except Exception :
 
 inf = float('inf');
 
-def chunkify(x,l,B) :
+_CB = 128;    # half of threshold chunk size for sequential chunking
+
+def _chunkify(x,l,B) :
   """return a list of B-sized chunks for int x of length l"""
   n = (l+B-1)//B;    # number of B-chunks
   y = [0]*n;
-  y[-1] = x << ((B-l)%B);
-  kf = 0 if B > 128 else bit_length(256//B-1);
-  for k in xrange(bit_length(n-1),kf,-1) :
-    c = 1<<(k-1);    # chunk increment
-    s = c*B;         # size of chunks being created
-    m = (1<<s)-1;    # mask
-    for i in xrange(n-1,c-1 if (n//c)&1 else -1,-c<<1) :
-      y[i-c] = y[i] >> s;
-      y[i] &= m;
-  if kf :
+  y[-1] = b = x << ((B-l)%B);
+  l = bit_length(b);    # everything else is 0
+  if l <= B : return y;
+  O = max(1,_CB//B);    # number of B-chunks per last stage (final offset)
+  S = O*B;    # target size of chunks at end of halvings
+  N = (l+B-1)//B;   # number of relevant B-chunks [i.e., eliding leading zeroes]
+  if N :
+    z = n-1-N;    # last irrelevant B-chunk
+    k = bit_length((N+O-1)//O-1);    # max number of halvings required
+    for k in xrange(k-1,-1,-1) :
+      o = O<<k;    # offset between created chunks
+      s = S<<k;    # size of chunks being created
+      m = (1<<s)-1;    # mask
+      for i in xrange(n-1,z+o,-o<<1) :
+        y[i-o] = y[i] >> s;
+        y[i] &= m;
+  if O > 1 :
     m = (1<<B)-1;
-    for i in xrange(n-1,-1,-1<<kf) :
+    for i in xrange(n-1,-1,-O) :
       x = y[i];
       while x :
         y[i] = x&m;
@@ -69,37 +78,18 @@ def chunkify(x,l,B) :
         i -= 1;
   return y;
 
-def _fill(self,x,mustzero=True) :
-  """fill list self._x with value x of bitlength l"""
-  B = self._B;
-  l = self._l;
-  v = self._x;
-  l %= B;
-  if l : x <<= (B-l);
-  m = (1<<B)-1;
-  i = -1;
-  while x :
-    v[i] = x&m;
-    x >>= B;
-    i -= 1;
-  if mustzero :
-    i += len(v);
-    for i in xrange(0,i+1) :
-      v[i] = 0;
-
 def _filll(self,x) :
   """or value x into list self._x"""
   B = self._B;
   l = self._l;
   v = self._x;
-  l %= B;
-  if l : x <<= (B-l);
-  m = (1<<B)-1;
-  i = -1;
-  while x :
-    v[i] |= x&m;
-    x >>= B;
-    i -= 1;
+  x <<= (B-l)%B;
+  xl = bit_length(x);
+  if xl <= B :
+    v[-1] |= x;
+  else :
+    for i,x in enumerate(reversed(_chunkify(x,xl+(-xl%B),B)),1) :
+      v[-i] |= x;
 
 def _fillr(self,b,other) :
   """fill list self._x starting at bit b, with other"""
@@ -109,23 +99,40 @@ def _fillr(self,b,other) :
   C = other._B;
   m = (1<<B)-1;
   if B == C :
-    bb,b = divmod(b,B);
-    if b :
-      c = B-b;
+    r = b%B;
+    b //= B;
+    if r :
+      c = B-r;
       z = (self._l-1)//B;    # last chunk
-      for i,y in enumerate(y,bb) :
-        x[i] |= y>>b;
+      for i,y in enumerate(y,b) :
+        x[i] |= y>>r;
         if i < z : x[i+1] = (y<<c)&m;
     else :
-      x[bb:] = y;
+      x[b:] = y;
+  elif not (B%C or b%C) :   # B is multiple of C (combine Cs to get a B)
+    q = B//C;    # number of Cs in a B
+    for i,y in enumerate(y,b//C) :
+      x[i//q] |= y << (B-(i%q+1)*C);
+  elif not (C%B or b%B) :   # C is a multiple of B (split Cs into Bs)
+    q = C//B;    # number of Bs from one C
+    m = (1<<B)-1;
+    for i,y in enumerate(y) :
+      e = b+i*q-1;
+      for r in xrange(e+q,e,-1) :
+        try :
+          x[r] = y&m;
+        except IndexError :    # last y may be partial
+          pass;
+        y >>= B;
   else :
     try :
       for i,y in enumerate(y) :    # C-bit chunks
-        sb,sr = divmod(b,B);
-        eb,er = divmod(b+C-1,B);
+        sb = b//B;
+        eb = (b+C-1)//B;
         if sb==eb :
-          x[sb] |= y<<(B-1-er);
+          x[sb] |= y<<(B-1-b%B-C);
         else :
+          sr = b%B;
           x[sb] |= y>>(C-B+sr);
           for a in xrange(sb+1,eb+1) :
             n = (a-sb+1)*B-C-sr;
@@ -171,9 +178,15 @@ def __init__(self,*args) :
       else :
         a = _bitstring[8](a);
     if isinstance(type(a),bitstrings) :
-      self._x = self._l = 0;
-      __iconcat__(self,a);
-      return;
+      self._l = l = a._l;
+      if l <= B :
+        self._x = __int__(a);
+        return;
+      if l <= a._B :
+        self._x = _chunkify(a._x,l,B);
+        return;
+      self._x = [0]*((l+B-1)//B);
+      return _fillr(self,0,a);
     else : raise TypeError('single arg must be bitstring')
   if len(args) > 2 :
     raise TypeError('too many args');
@@ -187,7 +200,7 @@ def __init__(self,*args) :
   if l <= B :
     self._x = x;
   else :
-    self._x = chunkify(x,l,B);
+    self._x = _chunkify(x,l,B);
 
 def __copy__(self) :
   """Return a copy of self"""
@@ -202,7 +215,7 @@ def __int__(self) :
   z = (B-l)%B;    # number of zeroes at end
   x = self._x;
   n = len(x);    # at least 2
-  o = 256//B;
+  o = _CB//B;
   if o > 1 :
     y = [];
     for k in xrange(n%o,n+o-1,o) :
@@ -247,39 +260,39 @@ __nonzero__ = __bool__
 
 def __eq__(self,other) :
   """Return True iff self and other are the same bitstring"""
-  if type(type(self)) != type(type(other)) :
+  if not isinstance(type(other),bitstrings) :
     return NotImplemented;
   return self._l == other._l and (
-    self._x == other._x if self._B == other._B else int(self) == int(other));
+    self._x == other._x if self._B == other._B else __int__(self) == __int__(other));
 
 def __ne__(self,other) :
   """Return True iff self and other are not the same bitstring"""
-  if type(type(self)) != type(type(other)) :
+  if not isinstance(type(other),bitstrings) :
     return NotImplemented;
   return self._l != other._l or (
-    self._x != other._x if self._B == other._B else int(self) != int(other));
+    self._x != other._x if self._B == other._B else __int__(self) != __int__(other));
 
 def __lt__(self,other) :
   """Return True iff self is a proper initial substring of other"""
-  if type(type(self)) != type(type(other)) :
+  if not isinstance(type(other),bitstrings) :
     return NotImplemented;
   return self._l < other._l and self == other[0:self._l];
 
 def __le__(self,other) :
   """Return True iff self is an initial substring of other"""
-  if type(type(self)) != type(type(other)) :
+  if not isinstance(type(other),bitstrings) :
     return NotImplemented;
   return self._l <= other._l and self == other[0:self._l];
 
 def __ge__(self,other) :
   """Return True iff other is an initial substring of self"""
-  if type(type(self)) != type(type(other)) :
+  if not isinstance(type(other),bitstrings) :
     return NotImplemented;
   return self._l >= other._l and self[:other._l] == other;
 
 def __gt__(self,other) :
   """Return True iff other is a proper initial substring of self"""
-  if type(type(self)) != type(type(other)) :
+  if not isinstance(type(other),bitstrings) :
     return NotImplemented;
   return self._l > other._l and self[:other._l] == other;
 
@@ -300,7 +313,7 @@ def __invert__(self) :
 
 def __neg__(self) :
   """Return the two's complement of self"""
-  return type(self)(-int(self),self._l);
+  return type(self)(-__int__(self),self._l);
 
 def __pos__(self) :
   """Return self"""
@@ -317,8 +330,8 @@ def __ilshift__(self,n) :    # actually, rotate
   if l <= B :
     self._x = ((self._x<<n)|(self._x>>(l-n)))&((1<<l)-1);
   else :
-    x = int(self);
-    _fill(self,((x<<n)|(x>>(l-n)))&((1<<l)-1));
+    x = __int__(self);
+    self._x = _chunkify(((x<<n)|(x>>(l-n)))&((1<<l)-1),l,B);
   return self;
 
 def __lshift__(self,n) :
@@ -336,8 +349,8 @@ def __irshift__(self,n) :    # actually, rotate
   if l <= B :
     self._x = ((self._x>>n)|(self._x<<(l-n)))&((1<<l)-1);
   else :
-    x = int(self);
-    _fill(self,((x>>n)|(x<<(l-n)))&((1<<l)-1));
+    x = __int__(self);
+    self._x = _chunkify(((x>>n)|(x<<(l-n)))&((1<<l)-1),l,B);
   return self;
 
 def __rshift__(self,n) :
@@ -349,15 +362,15 @@ def __ixor__(self,other) :
   B = self._B;
   l = self._l;
   x = self._x;
-  if type(type(self)) == type(type(other)) and l == other._l :
+  if isinstance(type(other),bitstrings) and l == other._l :
     if l <= B :
-      self._x ^= int(other);
+      self._x ^= __int__(other);
       return self;
     if other._B == B :
       for i,o in enumerate(other._x) :
         x[i] ^= o;
       return self;
-    other = int(other);
+    other = __int__(other);
   if isint(other) and -1 <= other>>l <= 0 :
     other &= (1<<l)-1;
     if l <= B :
@@ -385,15 +398,15 @@ def __iand__(self,other) :
   B = self._B;
   l = self._l;
   x = self._x;
-  if type(type(self)) == type(type(other)) and l == other._l :
+  if isinstance(type(other),bitstrings) and l == other._l :
     if l <= B :
-      self._x &= int(other);
+      self._x &= __int__(other);
       return self;
     if other._B == B :
       for i,o in enumerate(other._x) :
         x[i] &= o;
       return self;
-    other = int(other);
+    other = __int__(other);
   if isint(other) and -1 <= other>>l <= 0 :
     other &= (1<<l)-1;
     if l <= B :
@@ -420,15 +433,15 @@ def __ior__(self,other) :
   B = self._B;
   l = self._l;
   x = self._x;
-  if type(type(self)) == type(type(other)) and l == other._l :
+  if isinstance(type(other),bitstrings) and l == other._l :
     if l <= B :
-      self._x |= int(other);
+      self._x |= __int__(other);
       return self;
     if other._B == B :
       for i,o in enumerate(other._x) :
         x[i] |= o;
       return self;
-    other = int(other);
+    other = __int__(other);
   if isint(other) and -1 <= other>>l <= 0 :
     other &= (1<<l)-1;
     if l <= B :
@@ -455,12 +468,12 @@ def __iadd__(self,other) :
   """Add other to self, discard carry"""
   B = self._B;
   l = self._l;
-  if type(type(self)) == type(type(other)) and l == other._l or \
+  if isinstance(type(other),bitstrings) and l == other._l or \
      isint(other) and -1 <= other>>l <= 0 :
     if l <= B :
       self._x = (self._x+int(other))&((1<<l)-1);
     else :
-      _fill(self,(int(self)+int(other))&((1<<l)-1));
+      self._x = _chunkify((int(self)+int(other))&((1<<l)-1),l,B);
     return self;
   return NotImplemented;
 
@@ -474,12 +487,12 @@ def __isub__(self,other) :
   """Subtract other from self, discarding carry"""
   B = self._B;
   l = self._l;
-  if type(type(self)) == type(type(other)) and self._l == other._l or \
+  if isinstance(type(other),bitstrings) and self._l == other._l or \
      isint(other) and -1 <= other>>l <= 0 :
     if l <= B :
       self._x = (self._x-int(other))&((1<<l)-1);
     else :
-      _fill(self,(int(self)-int(other))&((1<<l)-1));
+      self._x = _chunkify((int(self)-int(other))&((1<<l)-1),l,B);
   else :
     return NotImplemented;
   return self;
@@ -492,7 +505,7 @@ def __rsub__(self,other) :
   """Return other minus self, discarding carry"""
   l = self._l;
   if isint(other) and -1 <= other>>l <= 0 :
-    return type(self)((other-int(self))&((1<<l)-1), l);
+    return type(self)((other-__int__(self))&((1<<l)-1), l);
   return NotImplemented;
 
 
@@ -512,9 +525,8 @@ def __getitem__(self,key) :
         if l <= B :
           x = (x<<1) | ((self._x>>(l-1-k))&1);
         else :
-          o,r = divmod(k,B);
-          y = self._x[o];
-          x = (x<<1) | ((y>>(B-1-r))&1);
+          y = self._x[k//B];
+          x = (x<<1) | ((y>>(B-1-k%B))&1);
         n += 1;
       else :
         raise IndexError('bitstring index out of range');
@@ -569,10 +581,10 @@ def __setitem__(self,key,value) :    # this makes bitstring mutable!
       n += max(0,(stop-start+step-(1 if step>0 else -1)))//step;
     else :
       raise TypeError('bitstring index not int or slice');
-  if type(type(value)) == bitstrings :
+  if isinstance(type(value),bitstrings) :
     if value._l != n :
       raise TypeError('value wrong size');
-    value = int(value);
+    value = __int__(value);
   elif isint(value) :
     if value >= 1<<n :
       raise TypeError('value too big');
@@ -659,14 +671,13 @@ def __iconcat__(self,*others) :
       nl = l+ol;
       if l <= B :
         if nl <= B :
-          self._x = x = (x<<ol)+int(other);
+          self._x = x = (x<<ol)+__int__(other);
           self._l = l = nl;
           continue;
         elif ol <= oB :
           y = (x<<ol)|other._x;
           self._l = l = nl;
-          self._x = x = [0]*((l+B-1)//B);
-          _filll(self,y);
+          self._x = _chunkify(y,l,B);
           continue;
         else :
           self._x = [x<<(B-l)]+[0]*((nl-1)//B);
@@ -691,14 +702,14 @@ def __concat__(self,*others) :
 
 def __itacnoc__(self,*others) :
   """Concatenate others to self on the left"""
-  x = int(self);
+  x = __int__(self);
   l = self._l;
   for other in others :
     if isint(other) and 0 <= other <= 1 :
       x |= other<<l;
       l += 1;
     elif isinstance(type(other),bitstrings) :
-      x |= int(other)<<l;
+      x |= __int__(other)<<l;
       l += other._l;
     else :
       raise TypeError('not bitstring');
@@ -707,20 +718,19 @@ def __itacnoc__(self,*others) :
   if l <= B :
     self._x = x;
   else :
-    self._x = [0]*((l+B-1)//B);
-    _fill(self,x,False);
+    self._x = _chunkify(x,l,B);
   return self;
   
 def __tacnoc__(self,*others) :    # concatenate backwards
   """Return a new bitstring formed by concatening the args in reverse order"""
-  x = int(self);
+  x = __int__(self);
   l = self._l;
   for other in others :
     if isint(other) and 0 <= other <= 1 :
       x |= other<<l;
       l += 1;
     elif isinstance(type(other),bitstrings) :
-      x |= int(other)<<l;
+      x |= __int__(other)<<l;
       l += other._l;
     else :
       raise TypeError('not bitstring');

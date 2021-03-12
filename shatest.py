@@ -51,9 +51,27 @@ def timing(name,setup,stmt,repeat=1) :
   print('%s\t%.3f ms'%(name,t/repeat*1000));
 
 if __name__ == '__main__' :
-  for md in mds :
-    timing(md,'','%s(bitstring(""))'%(md));
-  for t in tests :
-    print("'%s'"%(t) if len(t) <= 128 else '%s...%s'%(t[:64],t[-64:]));
+
+  def usage() :
+    print("""
+Usage: python shatest.py [options]
+   Options:  -h        print this message
+             -o l      only use test vectors less than o octets long [default 0]
+             -t n      print timing info for n-bit message [default 0]; use -1 to omit""");
+
+  import sys,getopt
+  opts,args = getopt.gnu_getopt(sys.argv[1:],"ht:o:");
+  optdict = {};
+  for pair in opts : optdict[pair[0][1:]]=pair[1];
+  if 'h' in optdict :
+    usage();
+  n = int(optdict.get('t',0));
+  if n >= 0 :
     for md in mds :
-      test(md,t);
+      timing(md,'','%s(bitstring(0,%d))'%(md,n));
+  o = int(optdict.get('o',0));
+  for t in tests :
+    if len(t) < o :
+      print("'%s'"%(t) if len(t) <= 128 else '%s...%s'%(t[:64],t[-64:]));
+      for md in mds :
+        test(md,t);

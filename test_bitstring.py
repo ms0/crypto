@@ -17,7 +17,7 @@ try:
 except Exception :
   process_time = default_timer;
 
-from bitstring import bitstrings
+from bitstring import bitstrings, _CB
 
 def b3x(b) :
   """transform string-based bitstring for sha3 input/output"""
@@ -165,15 +165,38 @@ inf = float('inf');
 bss = (1,30,31,32,64,inf);
 
 if __name__=='__main__' :
-  for B in bss :
-    print(' %s'%(B));
-    for _ in xrange(256) :
-      test1(bitstrings(B));
-      for C in bss :
-        test2(bitstrings(B),bitstrings(C))
-  for B in bss :
-    print(' %s'%(B));
-    timetest1(B);
-    for C in bss :
-      print('  %s'%(C));
-      timetest2(B,C);
+
+  def usage() :
+    print("""
+Usage: python test_bitstring.py [options]
+   Options:  -h        print this message
+             -o        omit operation testing
+             -t n      0->no timing, 1->only single B timing, 2->all timing [default]
+             -c s      threshold chunk size in bits
+""");
+
+  import sys,getopt
+  opts,args = getopt.gnu_getopt(sys.argv[1:],"hot:c:");
+  optdict = {};
+  for pair in opts : optdict[pair[0][1:]]=pair[1];
+  if 'h' in optdict :
+    usage();
+  if not 'o' in optdict :
+    for B in bss :
+      print(' %s'%(B));
+      for _ in xrange(256) :
+        test1(bitstrings(B));
+        for C in bss :
+          test2(bitstrings(B),bitstrings(C))
+  _CB = int(optdict.get('c',_CB));
+  t = int(optdict.get('t',2));
+  if t :
+    for B in bss :
+      print(' %s'%(B));
+      timetest1(B);
+      if t < 2 :
+        timetest2(B,B);
+      else :
+        for C in bss :
+          print('  %s'%(C));
+          timetest2(B,C);
