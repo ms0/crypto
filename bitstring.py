@@ -110,9 +110,10 @@ def _fillr(self,b,other) :
     else :
       x[b:] = y;
   elif not (B%C or b%C) :   # B is multiple of C (combine Cs to get a B)
+    D = B-C;
     q = B//C;    # number of Cs in a B
     for i,y in enumerate(y,b//C) :
-      x[i//q] |= y << (B-(i%q+1)*C);
+      x[i//q] |= y << (D-i%q*C);
   elif not (C%B or b%B) :   # C is a multiple of B (split Cs into Bs)
     q = C//B;    # number of Bs from one C
     m = (1<<B)-1;
@@ -125,17 +126,18 @@ def _fillr(self,b,other) :
           pass;
         y >>= B;
   else :
+    D = B-C;
     try :
       for i,y in enumerate(y) :    # C-bit chunks
         sb = b//B;
         eb = (b+C-1)//B;
         if sb==eb :
-          x[sb] |= y<<(B-1-b%B-C);
+          x[sb] |= y<<(D-b%B);
         else :
           sr = b%B;
-          x[sb] |= y>>(C-B+sr);
+          x[sb] |= y>>(sr-D);
           for a in xrange(sb+1,eb+1) :
-            n = (a-sb+1)*B-C-sr;
+            n = (a-sb)*B+D-sr;
             x[a] |= (y<<n if n >= 0 else y>>-n)&m;
         b += C;
     except IndexError:
