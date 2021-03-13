@@ -543,23 +543,22 @@ def __getitem__(self,key) :
           if l <= B :
             x |= (self._x>>(l-s[1]))&m;
           else :
-            eb,er = divmod(s[1]-1,B);    # last bit
-            sb,sr = divmod(s[0],B);      # first bit
+            sb = s[0]//B;
+            eb = (s[1]-1)//B
             if sb == eb :   # starts and ends in same block
-              x |= (self._x[eb]>>(B-1-er))&m;
+              x |= (self._x[sb]>>(-s[1]%B))&m;
             else :    # start and end in different blocks
-              x |= (self._x[sb]<<(ls+sr-B))&m;
-              x |= self._x[eb]>>(B-1-er);
+              y = self._x[sb] & ((1<<(B-s[0]%B))-1);
               for i in xrange(sb+1,eb) :
-                x |= self._x[i]<<((eb-1-i)*B+1+er);
+                y = (y<<B)|self._x[i];
+              b = -s[1]%B;    # bits discarded from last B-chunk
+              x |= (y<<(B-b))|(self._x[eb]>>b);
       else :
         for k in xrange(*s) :
           if l <= B :
             x = (x<<1) | ((self._x>>(l-1-k))&1);
           else :
-            o,r = divmod(k,B);
-            y = self._x[o];
-            x = (x<<1) | ((y>>(B-1-r))&1);
+            x = (x<<1) | ((self._x[k//B]>>(B-1-k%B))&1);
           n += 1;
     else :
       raise TypeError('bitstring index not int or slice');
@@ -602,11 +601,10 @@ def __setitem__(self,key,value) :    # this makes bitstring mutable!
         else :
           self._x &= ~(1<<(l-1-k));
       else :
-        o,r = divmod(k,B);
         if value&(1<<n) :
-          self._x[o] |= 1<<(B-1-r);
+          self._x[k//B] |= 1<<(B-1-k%B);
         else :
-          self._x[o] &= ~(1<<(B-1-r));
+          self._x[k//B] &= ~(1<<(B-1-k%B));
     elif isinstance(k,slice) :
       s = k.indices(l);
       if s[2] == 1 and B > 1 and s[1]-s[0] > 1:    # optimize for step==1
@@ -616,17 +614,18 @@ def __setitem__(self,key,value) :    # this makes bitstring mutable!
         if l <= B :
           self._x = self._x&~(m<<(l-s[1])) | (v<<(l-s[1]));
         else :
-          sb,sr = divmod(s[0],B);
-          eb,er = divmod(s[1]-1,B);
-          er += 1;
+          sb = s[0]//B;
+          eb = (s[1]-1)//B;
+          b = -s[1]%B;    # unaffected bits to right
           if sb == eb :
-            self._x[sb] = self._x[sb]&~(m<<(B-er)) | (v<<(B-er));
+            self._x[sb] = self._x[sb]&~(m<<b) | (v<<b);
           else :
-            self._x[sb] = self._x[sb]&(-1<<(B-sr))|(v>>(ls-B+sr));
+            c = B-s[0]%B;    # affected bits in first chunk
+            self._x[sb] = self._x[sb]&(-1<<c)|(v>>(ls-c));
             m = (1<<B)-1;
             for i in xrange(sb+1,eb) :
-              self._x[i] = (v>>(B*(eb-1-i)+er))&m;
-            self._x[eb] = self._x[eb]&((1<<(B-er))-1)|((v<<(B-er))&m);
+              self._x[i] = (v>>(B*(eb-i)-b))&m;
+            self._x[eb] = self._x[eb]&((1<<b)-1)|((v<<b)&m);
         n -= ls;
       else :
         for k in xrange(*s) :
@@ -637,11 +636,10 @@ def __setitem__(self,key,value) :    # this makes bitstring mutable!
             else :
               self._x &= ~(1<<(l-1-k));
           else :
-            o,r = divmod(k,B);
             if value&(1<<n) :
-              self._x[o] |= 1<<(B-1-r);
+              self._x[k//B] |= 1<<(B-1-k%B);
             else :
-              self._x[o] &= ~(1<<(B-1-r));
+              self._x[k//B] &= ~(1<<(B-1-k%B));
 
 def __iconcat__(self,*others) :
   """concat bits or bitstrings to self"""
