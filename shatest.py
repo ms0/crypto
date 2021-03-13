@@ -65,6 +65,7 @@ Usage: python shatest.py [options]
   for pair in opts : optdict[pair[0][1:]]=pair[1];
   if 'h' in optdict :
     usage();
+    if len(optdict) < 2 : sys.exit();
   n = int(optdict.get('t',0));
   if n >= 0 :
     for md in mds :

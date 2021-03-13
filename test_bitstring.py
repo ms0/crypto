@@ -34,9 +34,11 @@ def ceq(c,*v) :
     print(c,v);
     raise;
 
+maxbits = 1024;    # maximum number of bits in random arguments
+
 def test1(bs) :
   """test single bitstring type"""
-  l = randrange(256);    # size of bitstring
+  l = randint(0,maxbits);    # size of bitstring
   m = (1<<l)-1;    # bitstring mask
   x = randrange(1<<l);
   b = bs(x,l);
@@ -52,14 +54,14 @@ def test1(bs) :
   ceq('v[0]*0==type(v[0])()',b);
   ceq('len(v[0]*3)==len(v[0]*-3)==len(v[0])*3',b);
   if l :
-    i = randrange(l);
+    i = randint(0,l);
     ceq('v[0]==v[0][:v[1]].concat(v[0][v[1]:])',b,i);
     ceq('v[0]==v[0][v[1]:].tacnoc(v[0][:v[1]])',b,i);
     ceq('v[0]<<v[1]==v[0][v[1]:].concat(v[0][:v[1]])',b,i);
     ceq('v[0]<<v[1]==v[0]>>(len(v[0])-v[1])',b,i);
     ceq('v[0].trunc(v[1])==v[0][:v[1]]',b,i);
     ceq('v[0]<<v[1]==v[0][v[1]:].concat(v[0].trunc(v[1]))',b,i);
-    j = randrange(l);
+    j = randint(0,l);
     if i > j : i,j=j,i;
     c = bs(b);    # copy of b
     c[i:j] = ~b[i:j];    # usually munge c
@@ -80,7 +82,7 @@ def test1(bs) :
 
 def test2(b1,b2) :
   """test pairs of bitstring types"""
-  l = randrange(1024);   # size of bitstring
+  l = randint(0,maxbits);   # size of bitstring
   x = randrange(1<<l);
   b = b1(x,l);
   c = b2(x,l);
@@ -162,7 +164,7 @@ def timing(name,B,C,setup,stmt,repeat=1000) :
   print('%s\t%.3f ms'%(name,t/repeat*1000));
 
 inf = float('inf');
-bss = (1,30,31,32,64,inf);
+bss = (1,8,30,31,32,64,inf);
 
 if __name__=='__main__' :
 
@@ -172,15 +174,18 @@ Usage: python test_bitstring.py [options]
    Options:  -h        print this message
              -o        omit operation testing
              -t n      0->no timing, 1->only single B timing, 2->all timing [default]
-             -c s      threshold chunk size in bits
-""");
+             -m b      max number of bits in random op test args [default: %d]
+             -c s      threshold chunk size in bits [default: %d]
+"""%(maxbits,_CB));
 
   import sys,getopt
-  opts,args = getopt.gnu_getopt(sys.argv[1:],"hot:c:");
+  opts,args = getopt.gnu_getopt(sys.argv[1:],"hot:m:c:");
   optdict = {};
   for pair in opts : optdict[pair[0][1:]]=pair[1];
   if 'h' in optdict :
     usage();
+    if len(optdict) < 2 : sys.exit();
+  maxbits = int(optdict.get('m',maxbits));
   if not 'o' in optdict :
     for B in bss :
       print(' %s'%(B));
