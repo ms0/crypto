@@ -7,7 +7,7 @@ if sys.version_info[0] >= 3 :
   xrange = range;
 
 from bitstring import bitstrings
-bitstring=bitstrings(64);
+bitstring=bitstrings(1600);
 
 from math import log
 rlog2 = lambda x: int(round(log(x,2)));
@@ -43,17 +43,12 @@ class sharray(object) :
   def __getitem__(self,key) :
     """Get the keyth bit of state array self; key is x,y,z"""
     x,y,z = key;
-    if 0 <= x < 5 and 0 <= y < 5 and 0 <= z < self.x._l//25 :
-      return int(self.x[self.x._l//25*(5*y+x)+z]);
-    raise IndexError('sharray index out of range');
+    return int(self.x[self.x._l//25*(5*y+x)+z]);
 
   def __setitem__(self,key,b) :
     """Set the keyth bit of state array self; key is x,y,z"""
     x,y,z = key;
-    if 0 <= x < 5 and 0 <= y < 5 and 0 <= z < self.x._l//25 :
-      self.x[self.x._l//25*(5*y+x)+z] = b;
-    else :
-      raise IndexError('sharray index out of range');
+    self.x[self.x._l//25*(5*y+x)+z] = b;
 
   def plane(self,i) :
     """Return a copy of the ith plane of state array self"""
@@ -93,19 +88,14 @@ class plane(object) :
     x,z = key;
     s = self.x;
     m = s._l//5;
-    if 0 <= z < m :
-      return int(s[m*x+z]);
-    raise IndexError('index out of range');
+    return int(s[m*x+z]);
 
   def __setitem__(self,key,b) :
     """Set the keyth bit of plane self to b, addressed as x,z"""
     x,z = key;
     s = self.x;
     m = s._l//5;
-    if 0 <= z < m :
-      s[m*x+z] = b;
-    else :
-      raise IndexError('index out of range');
+    s[m*x+z] = b;
 
   def __xor__(self,other) :
     """Bitwise xor other to self, both planes; left plane is munged!"""
