@@ -44,15 +44,10 @@ def pad(M,      # message (as bitstring)
   m = m or 8*L;
   l = len(M);
   k = (-1-l-L)%m;
-  return M.iconcat(bitstring(1<<k,k+1)).iconcat(bitstring(l,L));
-
-def split(M,w) :    # split padded message M into words with wordsize w
-  return [M[i:i+w] for i in xrange(0,len(M),w)];
+  return M.iconcat(bitstring(1<<k,k+1),bitstring(l,L));
 
 def concat(H) :
-  for h in H[1:] :
-    H[0].iconcat(h);
-  return H[0];
+  return bitstring.iconcat(*H);
 
 ################################################################
 # SHA1
@@ -72,7 +67,7 @@ def SHA1(M) :
   m = 512;    # blocksize
   w = 32;     # wordsize
   wpb = m//w;
-  M = split(pad(M),w);
+  M = pad(M).split(w);
   N = len(M)//wpb;
   H = lmap(lambda x: bitstring(x,w),H1);
   for i in xrange(N) :
@@ -112,7 +107,7 @@ SHA224 = lambda M: SHA256(M,H224).itrunc(224);
 def SHA2(M,H0,m,w,n,S0,S1,s0,s1) :
   wpb = m//w;
   K = lmap(lambda x: x >> (64-w), K2[:n]);
-  M = split(pad(M,2*w),w);
+  M = pad(M,2*w).split(w);
   N = len(M)//wpb;
   H = lmap(lambda x: bitstring(x,w), H0);
   for i in xrange(N) :
@@ -142,8 +137,8 @@ def SHA512t(t,M) :
     raise valueError('t must be a positive integer < 512 and not 384');
   return SHA512(M,lmap(
       int,
-      split(SHA512(bitstring('SHA-512/%d'%(t)),
-                   lmap(lambda x: x^0xa5a5a5a5a5a5a5a5, H512)),64))).itrunc(t);
+      SHA512(bitstring('SHA-512/%d'%(t)),
+             lmap(lambda x: x^0xa5a5a5a5a5a5a5a5, H512)).split(64))).itrunc(t);
 
 SHA512_224 = lambda M: SHA512t(224,M);
 SHA512_256 = lambda M: SHA512t(256,M);

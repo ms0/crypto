@@ -73,6 +73,7 @@ Usage: python shatest.py [options]
   o = int(optdict.get('o',0));
   for t in tests :
     if len(t) < o :
-      print("'%s'"%(t) if len(t) <= 128 else '%s...%s'%(t[:64],t[-64:]));
+      print(("'%s'"%(t) if len(t) <= 128 else "'%s...%s'"%(t[:64],t[-64:]))+
+            " [%d octets]"%(len(t)));
       for md in mds :
         test(md,t);

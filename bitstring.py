@@ -798,6 +798,26 @@ def __mul__(self,n) :
   """Return a bitstring comprising |n| copies of self, bitreversed if n < 0"""
   return __imul__(type(self)(self),n);
 
+def __split__(self,B) :
+  """Return a list of bitstrings(B) of length B that concatenate to self;
+     the last element of the list may have nonzero length less than B"""
+  bB = bitstrings(B);
+  b = bB(self);
+  l = self._l;
+  if l <= B  : return [b];
+  x = b._x;
+  for i,b in enumerate(x) :
+    x[i] = z = bB();
+    z._x = b;
+    z._l = B;
+  l %= B;
+  if l :
+    z._l = l;
+    z._x >>= B-l;
+  return x;
+
+################################################################
+
 _bitstring = {};  # chunk -> bitstring
 
 class bitstrings(type) :
@@ -863,6 +883,7 @@ class bitstrings(type) :
              tacnoc=__tacnoc__,
              itrunc=__itrunc__,
              trunc=__trunc__,
+             split=__split__,
              copy=__copy__,
            );
     name = 'bitstring%d'%(chunk) if chunk < inf else 'bitstring';

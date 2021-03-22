@@ -54,6 +54,8 @@ def test1(bs) :
   ceq('v[0]*0==type(v[0])()',b);
   ceq('len(v[0]*3)==len(v[0]*-3)==len(v[0])*3',b);
   if l :
+    i = randint(1,64);
+    ceq('v[0]==type(v[0]).iconcat(*v[0].split(v[1]))',b,i);
     i = randint(0,l);
     ceq('v[0]==v[0][:v[1]].concat(v[0][v[1]:])',b,i);
     ceq('v[0]==v[0][v[1]:].tacnoc(v[0][:v[1]])',b,i);
@@ -152,8 +154,8 @@ def timetest2(B,C) :
   timing('ior',B,C,'b=bb(3**646,1024);c=bc(5**441,1024)','b|=c');
   timing('iadd',B,C,'b=bb(3**646,1024);c=bc(5**441,1024)','b+=c');
   timing('isub',B,C,'b=bb(3**646,1024);c=bc(5**441,1024)','b-=c');
+  timing('split',B,C,'b=bb(3**646,1024)','b.split(bc._B)');
   
-
 def timing(name,B,C,setup,stmt,repeat=1000) :
   """Print time taken by stmt"""
   collect();
