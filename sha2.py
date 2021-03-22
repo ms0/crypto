@@ -44,7 +44,7 @@ def pad(M,      # message (as bitstring)
   m = m or 8*L;
   l = len(M);
   k = (-1-l-L)%m;
-  return M.iconcat(bitstring(1<<k,k+1),bitstring(l,L));
+  return M.concat(bitstring(1<<k,k+1),bitstring(l,L));
 
 def concat(H) :
   return bitstring.iconcat(*H);
@@ -128,7 +128,7 @@ def SHA256(M,H0=H256) :
   return SHA2(M,H0,512,32,64,S320,S321,s320,s321);
 
 SHA384 = lambda M: SHA512(M,H384).itrunc(384);
-      
+
 def SHA512(M,H0=H512) :
   return SHA2(M,H0,1024,64,80,S640,S641,s640,s641);
 

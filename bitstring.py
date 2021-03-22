@@ -825,7 +825,7 @@ class bitstrings(type) :
 
   def __new__(cls,chunk=inf) :
     try :
-      return _bitstring(chunk);
+      return _bitstring[chunk];
     except :
       pass;
     if not isint(chunk) and chunk != inf :
@@ -853,11 +853,6 @@ class bitstrings(type) :
              __setitem__=__setitem__,
              __imul__=__imul__,      # repeat (int other), or concat (bitstring other)
              __mul__=__mul__,
-#             __imod__=__imod__,      # truncate (other is length of result)
-#             __mod__=__mod__,
-#             __ifloordiv__=__ifloordiv__,    # truncate (other is # bits removed!)
-#             __floordiv__=__floordiv__,
-#             __divmod__ = __divmod__,    # split, other is # bits in mod)
              __ilshift__=__ilshift__,    # rotate left
              __irshift__=__irshift__,    # roate right
              __lshift__=__lshift__,

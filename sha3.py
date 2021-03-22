@@ -208,17 +208,17 @@ def pad10_1(x,m) :
 
 def SHA3(x) :
   def X(M) :
-    return Keccak(2*x)(M.iconcat(0,1),x);
+    return Keccak(2*x)(M.concat(0,1),x);
   return X;
 
 def SHAKE(x) :
   def X(M,d) :
-    return Keccak(2*x)(M.iconcat(bitstring(0xf,4)),d);
+    return Keccak(2*x)(M.concat(bitstring(0xf,4)),d);
   return X
 
 def RawSHAKE(x) :
   def X(J,d) :
-    return Keccak(2*x)(J.iconcat(bitstring(3,2),d));
+    return Keccak(2*x)(J.concat(bitstring(3,2),d));
   return X;
 
 def b3x(b) :

@@ -55,7 +55,7 @@ def test1(bs) :
   ceq('len(v[0]*3)==len(v[0]*-3)==len(v[0])*3',b);
   if l :
     i = randint(1,64);
-    ceq('v[0]==type(v[0]).iconcat(*v[0].split(v[1]))',b,i);
+    ceq('v[0]==bitstrings(v[1]).iconcat(*v[0].split(v[1]))',b,i);
     i = randint(0,l);
     ceq('v[0]==v[0][:v[1]].concat(v[0][v[1]:])',b,i);
     ceq('v[0]==v[0][v[1]:].tacnoc(v[0][:v[1]])',b,i);

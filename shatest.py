@@ -7,12 +7,12 @@ tests = ['',
          'abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu',
          'a'*int(1e6),
 #         'abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno'*(1<<24),
-        ]
+        ];
 
-SHA3_224x = lambda x:b3x(SHA3_224(b3x(x)));
-SHA3_256x = lambda x:b3x(SHA3_256(b3x(x)));
-SHA3_384x = lambda x:b3x(SHA3_384(b3x(x)));
-SHA3_512x = lambda x:b3x(SHA3_512(b3x(x)));
+SHA3_224x = lambda x:b3x(SHA3_224(b3x(x[:])));
+SHA3_256x = lambda x:b3x(SHA3_256(b3x(x[:])));
+SHA3_384x = lambda x:b3x(SHA3_384(b3x(x[:])));
+SHA3_512x = lambda x:b3x(SHA3_512(b3x(x[:])));
 
 mds = ['SHA1',
        'SHA224',
@@ -29,7 +29,7 @@ mds = ['SHA1',
 
 def test(d,m) :    # digest, message
   md = globals()[d];
-  print('%s: %s'%(d,md(bitstring(m))));
+  print('%s: %s'%(d,md(m)));
 
 
 from timeit import timeit, default_timer
@@ -75,5 +75,6 @@ Usage: python shatest.py [options]
     if len(t) < o :
       print(("'%s'"%(t) if len(t) <= 128 else "'%s...%s'"%(t[:64],t[-64:]))+
             " [%d octets]"%(len(t)));
+      t = bitstring(t);
       for md in mds :
         test(md,t);
