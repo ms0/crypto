@@ -63,6 +63,13 @@ def test1(bs) :
     ceq('v[0]<<v[1]==v[0]>>(len(v[0])-v[1])',b,i);
     ceq('v[0].trunc(v[1])==v[0][:v[1]]',b,i);
     ceq('v[0]<<v[1]==v[0][v[1]:].concat(v[0].trunc(v[1]))',b,i);
+    ceq('v[0]==v[0].trunc(len(v[0])+v[1]).trunc(len(v[0]))',b,i);
+    ceq('v[0][:].itrunc(v[1])==v[0].trunc(v[1])',b,i);
+    ceq('v[0][:].itrunc(-v[1])==v[0].trunc(-v[1])',b,i);
+    ceq('v[0][:].itrunc(v[1])==v[0].trunc(v[1])',b,i+l);
+    ceq('v[0][:].itrunc(-v[1])==v[0].trunc(-v[1])',b,i+l);
+    if i :
+      ceq('v[0].trunc(-v[1])==v[0][-v[1]:]',b,i);
     j = randint(0,l);
     if i > j : i,j=j,i;
     c = bs(b);    # copy of b

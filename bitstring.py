@@ -737,17 +737,59 @@ def __tacnoc__(self,*others) :    # concatenate backwards
   return type(self)(x,l);
 
 def __itrunc__(self,l) :
-  """Truncate self to length l"""
-  if not isint(l) or l < 0 :
-    raise IndexError('length not nonnegative integer');
+  """Truncate self to length |l|; if l < 0 truncate from left"""
+  if not isint(l) :
+    raise IndexError('length not an integer');
   B = self._B;
-  if l > self._l :    # extend with zeroes
+  if l < 0 :
+    l = -l;
+    if l >= self._l :    # extend with zeroes
+      if l > B :    # nothing to do unless need to make list
+        if self._l <= B :
+          x = self._x;
+          self._x = [0]*((l+B-1)//B);
+          self._x[-1] = x << (B-l)%B;
+        else :
+          ox = self._x;
+          ol = len(ox);    # old list's length
+          self._x = x = [0]*((l+B-1)//B-ol) + ox;
+          o = (self._l-l)%B;    # bit offset
+          if o :    # need to shift
+            m = (1<<B)-1;
+            if (B-self._l)%B < (B-l)%B :   # must shift left
+              for i in xrange(-min(ol+1,len(x)),-1) :
+                x[i] = (x[i]<<o)&m | (x[i+1]>>(B-o));
+              x[-1] = (x[-1]<<o)&m;
+            else :                 # must shift right
+              for i in xrange(-1,-ol) :
+                x[i] = (x[i] >> (B-o)) | (x[i-1] << o)&m
+              x[-ol] >>= B-o;
+    elif l <= B :
+      if self._l <= B :
+        self._x &= (1<<l)-1;
+      else :
+        self._x = (((self._x[-2]<<B)|self._x[-1]) >> ((B-self._l)%B))&((1<<l)-1);
+    else :
+      x = self._x;
+      o = (self._l-l)%B;
+      nl = (l+B-1)//B;    # new length
+      if o :    # need to shift
+        m = (1<<B)-1;
+        if (B-self._l)%B < (B-l)%B :   # must shift left
+          for i in xrange(-nl,-1) :
+            x[i] = (x[i]<<o)&m | (x[i+1]>>(B-o));
+          x[-1] = (x[-1]<<o)&m;
+        else :
+          for i in xrange(-1,-nl-1,-1) :
+            x[i] = (x[i] >> (B-o)) | (x[i-1] << o)&m
+      del x[:len(x)-nl];    # truncate
+  elif l >= self._l :    # extend with zeroes
     if l <= B :
       self._x <<= l-self._l;
     else :
       if self._l <= B :
         self._x = [self._x<<(B-self._l)] if self._l else [];
-      self._x += [0]*((l+B-1)//B-(self._l+B-1)//B);
+      self._x += [0]*((l+B-1)//B-len(self._x));
   else :    # truncate
     x = self._x;
     if l <= B :
@@ -759,10 +801,31 @@ def __itrunc__(self,l) :
   return self;
 
 def __trunc__(self,l) :
-  """Return a bitstring formed by truncating self to length l"""
-  if not isint(l) or l < 0 :
-    raise IndexError('length not nonnegative integer');
-  if l > self._l :    # extend with zeroes
+  """Return a bitstring formed by truncating self to length |l|; if l < 0, from left"""
+  if not isint(l) :
+    raise IndexError('length not an integer');
+  if l < 0 :
+    B = self._B;
+    if self._l <= max(B,-l) :
+      return __itrunc__(type(self)(self),l);
+    s = type(self)();
+    if -l <= B :
+      s._x = (((self._x[-2]<<B)|self._x[-1]) >> ((B-self._l)%B))&((1<<-l)-1);
+    else :
+      o = (self._l+l)%B
+      nl = o-l;    # new length in best case
+      s._x = x = self._x[-((nl+B-1)//B):];
+      if o :    # have to shift
+        m = (1<<B)-1;
+        for i in xrange(len(x)-1) :
+          x[i] = (x[i]<<o)&m | (x[i+1]>>(B-o));
+        if (B-1-l)//B < len(x) :
+          del x[-1];
+        else :
+          x[-1] = (x[-1]<<o)&m;
+    s._l = -l;
+    return s;
+  if l >= self._l :    # extend with zeroes
     return __itrunc__(type(self)(self),l);
   B = self._B;
   x = self._x;
