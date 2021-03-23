@@ -56,6 +56,7 @@ def test1(bs) :
   if l :
     i = randint(1,64);
     ceq('v[0]==bitstrings(v[1]).iconcat(*v[0].split(v[1]))',b,i);
+    ceq('v[0]==bitstrings(v[1]).iconcat(*v[0].split(-v[1]))',b,i);
     i = randint(0,l);
     ceq('v[0]==v[0][:v[1]].concat(v[0][v[1]:])',b,i);
     ceq('v[0]==v[0][v[1]:].tacnoc(v[0][:v[1]])',b,i);
@@ -130,7 +131,7 @@ R.seed(0);
 # (2) rotations of various amounts (<< >>)
 # (2) conversion between bitstring types
 # (3) concatenation
-# (4) truncation, /, %, divmod
+# (4) truncation
 # (5) scalar multiplication (*)
 # (6) b3x
 
@@ -146,6 +147,11 @@ def timetest1(B) :
   timing('b3x',B,B,'b=bb(3**646,1024)','b3x(b)');
   timing('shift1',B,B,'b=bb(3**646,1024)','b<<=1');
   timing('shifth',B,B,'b=bb(3**646,1024)','b<<=512');
+  timing('trunch',B,B,'b=bb(3**646,1024)','b.trunc(511)');
+  timing('trunc-h',B,B,'b=bb(3**646,1024)','b.trunc(-511)');
+  timing('itrunc',B,B,'b=bb(3**646,1024)','b.itrunc(511)');
+  timing('itrunc-',B,B,'b=bb(3**646,1024)','b.itrunc(-511)');  
+
 
 def timetest2(B,C) :
   timing('convert',B,C,'b=bb(3**646,1024)','bc(b)');
@@ -161,7 +167,8 @@ def timetest2(B,C) :
   timing('ior',B,C,'b=bb(3**646,1024);c=bc(5**441,1024)','b|=c');
   timing('iadd',B,C,'b=bb(3**646,1024);c=bc(5**441,1024)','b+=c');
   timing('isub',B,C,'b=bb(3**646,1024);c=bc(5**441,1024)','b-=c');
-  timing('split',B,C,'b=bb(3**646,1024)','b.split(bc._B)');
+  timing('split',B,C,'b=bb(7**365,1025)','b.split(bc._B)');
+  timing('split-',B,C,'b=bb(7**365,1025)','b.split(-bc._B)');
   
 def timing(name,B,C,setup,stmt,repeat=1000) :
   """Print time taken by stmt"""
