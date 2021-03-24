@@ -28,7 +28,7 @@ def b3x(b) :
 
 def ceq(c,*v) :
   try :
-    if not eval(c) :
+    if not eval(c,locals()) :
       print(c,v);
   except Exception :
     print(c,v);
@@ -53,10 +53,14 @@ def test1(bs) :
   ceq('v[0]*-1==v[0][::-1]',b);
   ceq('v[0]*0==type(v[0])()',b);
   ceq('len(v[0]*3)==len(v[0]*-3)==len(v[0])*3',b);
+  i = randint(1,64);
+  ceq('len(v[0].split(v[1]))==(v[2]+v[1]-1)//v[1]',b,i,l);
+  ceq('len(v[0].split(-v[1]))==(v[2]+v[1]-1)//v[1]',b,i,l);
   if l :
-    i = randint(1,64);
-    ceq('v[0]==bitstrings(v[1]).iconcat(*v[0].split(v[1]))',b,i);
-    ceq('v[0]==bitstrings(v[1]).iconcat(*v[0].split(-v[1]))',b,i);
+    ceq('all(len(x)==v[1] for x in v[0].split(v[1])[:-1])',b,i);
+    ceq('all(len(x)==v[1] for x in v[0].split(-v[1])[1:])',b,i);
+    ceq('v[0]==type(v[0]).iconcat(*v[0].split(v[1]))',b,i);
+    ceq('v[0]==type(v[0]).iconcat(*v[0].split(-v[1]))',b,i);
     i = randint(0,l);
     ceq('v[0]==v[0][:v[1]].concat(v[0][v[1]:])',b,i);
     ceq('v[0]==v[0][v[1]:].tacnoc(v[0][:v[1]])',b,i);

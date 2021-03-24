@@ -69,7 +69,7 @@ Usage: python shatest.py [options]
   n = int(optdict.get('t',0));
   if n >= 0 :
     for md in mds :
-      timing(md,'','%s(bitstring(0,%d))'%(md,n));
+      timing(md,'M=bitstring(-1,%d)'%(n),'%s(M)'%(md));
   o = int(optdict.get('o',0));
   for t in tests :
     if len(t) < o :

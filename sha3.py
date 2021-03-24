@@ -183,12 +183,9 @@ def Keccak_f(b) :
 
 def SPONGE(f,b,pad,r) :    # f is function over b-bit strings, r is rate
   def X(N,d) :
-    P = N.iconcat(pad(r,len(N)));
-    n = len(P)//r;
-    c = b-r;
     S = bitstring(0,b);
-    for i in xrange(n) :
-      S ^= P[i*r:(i+1)*r].iconcat(bitstring(0,c));
+    for p in N.iconcat(pad(r,len(N))).split(r) :
+      S ^= p.itrunc(b);
       S = f(S);
     Z = S.trunc(r);
     while len(Z) < d :
