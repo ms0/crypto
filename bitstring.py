@@ -861,29 +861,57 @@ def __mul__(self,n) :
   """Return a bitstring comprising |n| copies of self, bitreversed if n < 0"""
   return __imul__(type(self)(self),n);
 
-def __split__(self,B) :
-  """Return a list of length B type(self) elements that concatenate to self;
-     the last element of the list may have nonzero length less than B.
-     But if B is negative, B is replaced by -B and instead
-     the first element of the list may have nonzero length less than B."""
+def __split__(self,C) :
+  """Return a list of type(self) elements whose concatenation == self.
+     Each list element has nonzero length <= abs(C). C must be nonzero.
+     If C > 0, all but the last list element has length == C.
+     If C < 0, all but the first list element has length == C."""
   l = self._l;
   t = type(self);
-  if B < 0 :
-    B = -B;
-    if l > B :
-      o = -l%B;
+  B = t._B;  
+  if C < 0 :
+    C = -C;
+    if l > C :
+      o = -l%C;
       if o :
-        x = bitstrings(B)(0,o).iconcat(self)._x;
-        for i,b in enumerate(x) :
-          x[i] = t(b,B);
-        x[0].itrunc(o-B);
+        x = bitstrings(C)(0,o).iconcat(self)._x;
+        # for i,b in enumerate(x) :
+        #  x[i] = t(b,C);
+        # x[0].itrunc(o-C);
+        if C <= B :
+          for i,b in enumerate(x) :
+            x[i] = z = t();
+            z._x = b;
+            z._l = C;
+          x[0]._l = C-o;
+        else :
+          for i,b in enumerate(x) :
+            x[i] = z = t();
+            z._x = _chunkify(b,C,B);
+            z._l = C;
+          x[0].itrunc(o-C);
         return x;
-  if l <= B  : return [t(self)] if l else [];
-  x = bitstrings(B)(self)._x;
-  for i,b in enumerate(x) :
-    x[i] = t(b,B);
-  l %= B;
-  if l : x[-1].itrunc(l);
+  if l <= C  : return [t(self)] if l else [];
+  x = bitstrings(C)(self)._x;
+  l %= C;
+  # for i,b in enumerate(x) :
+  #  x[i] = t(b,C);
+  # if l : z.itrunc(l);
+  if C <= B :
+    for i,b in enumerate(x) :
+      x[i] = z = t();
+      z._x = b;
+      z._l = C;
+    if l :
+      z._x >>= C-l;
+      z._l = l;
+  else :
+    for i,b in enumerate(x) :
+      x[i] = z = t();
+      z._x = _chunkify(b,C,B);
+      z._l = C;
+    if l :
+      z.itrunc(l);
   return x;
 
 ################################################################
