@@ -218,12 +218,12 @@ def RawSHAKE(x) :
     return Keccak(2*x)(J.concat(bitstring(3,2),d));
   return X;
 
+_x3 = [bitstring(i,8)[::-1] for i in xrange(1<<8)];    # reverse 8 bits
+_x3x = lambda x: type(x)(_x3[int(x)]);
+
 def b3x(b) :
   """transform string-based bitstring for sha3 input/output"""
-  l = b._l;
-  for i in xrange(0,l+7,8) :
-    b[i:i+8] = b[i+7:i-1 if i else None:-1];
-  return b;
+  return type(b).iconcat(*map(_x3x,b.split(8))).itrunc(b._l) if b._l else type(b)();
 
 SHA3_224 = SHA3(224);
 SHA3_256 = SHA3(256);

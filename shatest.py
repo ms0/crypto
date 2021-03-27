@@ -9,10 +9,10 @@ tests = ['',
 #         'abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno'*(1<<24),
         ];
 
-SHA3_224x = lambda x:b3x(SHA3_224(b3x(x[:])));
-SHA3_256x = lambda x:b3x(SHA3_256(b3x(x[:])));
-SHA3_384x = lambda x:b3x(SHA3_384(b3x(x[:])));
-SHA3_512x = lambda x:b3x(SHA3_512(b3x(x[:])));
+SHA3_224x = lambda x:b3x(SHA3_224(b3x(x)));
+SHA3_256x = lambda x:b3x(SHA3_256(b3x(x)));
+SHA3_384x = lambda x:b3x(SHA3_384(b3x(x)));
+SHA3_512x = lambda x:b3x(SHA3_512(b3x(x)));
 
 mds = ['SHA1',
        'SHA224',
