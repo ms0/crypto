@@ -118,7 +118,7 @@ def _fillr(self,b,other) :
     q = C//B;    # number of Bs from one C
     m = (1<<B)-1;
     for i,y in enumerate(y) :
-      e = b+i*q-1;
+      e = b//B+i*q-1;
       for r in xrange(e+q,e,-1) :
         try :
           x[r] = y&m;
