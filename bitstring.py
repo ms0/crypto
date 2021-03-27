@@ -641,7 +641,7 @@ def __setitem__(self,key,value) :    # this makes bitstring mutable!
             else :
               self._x[k//B] &= ~(1<<(B-1-k%B));
 
-def _concat(self,*others) :
+def _iconcat(self,*others) :
   """Common section of __concat__ and __iconcat__"""
   B = self._B;
   if B<inf:  m = (1<<B)-1;
