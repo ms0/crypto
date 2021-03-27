@@ -219,11 +219,11 @@ def RawSHAKE(x) :
   return X;
 
 _x3 = [bitstring(i,8)[::-1] for i in xrange(1<<8)];    # reverse 8 bits
-_x3x = lambda x: type(x)(_x3[int(x)]);
+_x3x = lambda x: _x3[int(x)];
 
 def b3x(b) :
   """transform string-based bitstring for sha3 input/output"""
-  return type(b).iconcat(*map(_x3x,b.split(8))).itrunc(b._l) if b._l else type(b)();
+  return type(b).concat(*map(_x3x,b.split(8))).itrunc(b._l) if b._l else type(b)();
 
 SHA3_224 = SHA3(224);
 SHA3_256 = SHA3(256);

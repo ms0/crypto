@@ -641,11 +641,8 @@ def __setitem__(self,key,value) :    # this makes bitstring mutable!
             else :
               self._x[k//B] &= ~(1<<(B-1-k%B));
 
-def __iconcat__(self,*others) :
-  """concat bits or bitstrings to self"""
-  if self in others :
-    c = type(self)(self);    # copy
-    others = tuple(o if o != self else c for o in others);
+def _concat(self,*others) :
+  """Common section of __concat__ and __iconcat__"""
   B = self._B;
   if B<inf:  m = (1<<B)-1;
   x = self._x;
@@ -696,9 +693,16 @@ def __iconcat__(self,*others) :
       raise TypeError('can only concatenate bits and bitstrings');
   return self;
 
+def __iconcat__(self,*others) :
+  """concat bits or bitstrings to self"""
+  if self in others :    # avoid mutating args before using them
+    c = type(self)(self);    # copy
+    others = tuple(c if o is self else o for o in others);
+  return _iconcat(self,*others);
+
 def __concat__(self,*others) :
   """Return a new bitstring formed by concatenating the args, each a bit or a bitstring"""
-  return __iconcat__(type(self)(self),*others);
+  return _iconcat(type(self)(self),*others);
 
 def __itacnoc__(self,*others) :
   """Concatenate others to self on the left"""
