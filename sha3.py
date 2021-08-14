@@ -1,4 +1,3 @@
-
 # SHA-3 implementation
 
 import sys
@@ -184,10 +183,10 @@ def Keccak_f(b) :
 def SPONGE(f,b,pad,r) :    # f is function over b-bit strings, r is rate
   def X(N,d) :
     S = bitstring(0,b);
-    for p in N.iconcat(pad(r,len(N))).split(r) :
+    for p in N.iconcat(pad(r,len(N))).split(r) :    # absorption
       S ^= p.itrunc(b);
       S = f(S);
-    Z = S.trunc(r);
+    Z = S.trunc(r);    # squeezing
     while len(Z) < d :
       S = f(S);
       Z = Z.iconcat(S.trunc(r));
@@ -195,9 +194,7 @@ def SPONGE(f,b,pad,r) :    # f is function over b-bit strings, r is rate
   return X;
 
 def Keccak(c) :
-  def X(N,d) :
-    return SPONGE(Keccak_p(1600,24),1600,pad10_1,1600-c)(N,d);
-  return X;
+  return SPONGE(Keccak_p(1600,24),1600,pad10_1,1600-c);
 
 def pad10_1(x,m) :
   j = (-m-2)%x;
@@ -211,11 +208,30 @@ def SHA3(x) :
 def SHAKE(x) :
   def X(M,d) :
     return Keccak(2*x)(M.concat(bitstring(0xf,4)),d);
-  return X
+  return X;
 
 def RawSHAKE(x) :
   def X(J,d) :
     return Keccak(2*x)(J.concat(bitstring(3,2),d));
+  return X;
+
+def SPONGEN(f,b,pad,r) :    # returns a generator of r-bit strings
+  def X(N) :
+    S = bitstring(0,b);
+    for p in N.iconcat(pad(r,len(N))).split(r) :    # absorption
+      S ^= p.itrunc(b);
+      S = f(S);
+    while True :    # squeezing
+      yield S.trunc(r);
+      S = f(S);
+  return X;
+
+def KeccakN(c) :
+  return SPONGEN(Keccak_p(1600,24),1600,pad10_1,1600-c);
+
+def SHAKEN(x) :
+  def X(M) :
+    return KeccakN(2*x)(M.concat(bitstring(0xf,4)));
   return X;
 
 _x3 = [bitstring(i,8)[::-1] for i in xrange(1<<8)];    # reverse 8 bits
@@ -232,3 +248,6 @@ SHA3_512 = SHA3(512);
 
 SHAKE128 = SHAKE(128);
 SHAKE256 = SHAKE(256);
+
+SHAKEN128 = SHAKEN(128);
+SHAKEN256 = SHAKEN(256);
