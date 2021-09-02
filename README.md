@@ -30,11 +30,7 @@ bitstring instances have the following attributes:
 <table>
  <tr><td>.x</td><td>the bitstring interpreted as a big-endian integer</td></tr>
  <tr><td>._l</td><td>the number of bits in the bitstring (same as len())</td></tr>
- <tr><td></td><td>Specifically for use by SHA3, if ._l is 25*2**l for some integer l, then</td></tr>
-  <tr><td>.b</td><td>same as ._l</td></tr>
-  <tr><td>.w</td><td>._l/25</td></tr>
-  <tr><td>.l</td><td>log(._l/25)</td></tr>
-</table>
+ </table>
   
 In the bitstring class, the following operators are defined:<br>
 <table>
@@ -61,6 +57,7 @@ In the bitstring class, the following functions are defined:
 <tr><td> .tacnoc(sequence of bitstrings and 0s and 1s)</td>
    <td>returns the bitstring resulting from concatenating the reversed sequence of bits and bitstrings with the bitstring</td></tr>
 <tr><td> .trunc(n) </td><td>equivalent to [:n] if 0 <= n <= ._l, else if n >= 0, concatenate 0s so resulting length is always exactly n</td></tr>
+<tr><td></td><td>if n < 0, truncate from the left or concatenate 0s on the left so that the resulting length is always exactly -n</td></tr>
 </table>
 
 sha3.py also implements the following function:
