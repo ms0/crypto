@@ -3,13 +3,15 @@ Crypto-related python routines, for exposition, not performance
 
 Dependencies: rational.py and ffield.py from pymath repository (for computing constants in SHA2.py, for various uses in rsa.py)
 
+rc4.py contains code for the RC4 one-time pad generator
+
 rsa.py contains code for creating and using RSA key pairs
 
-SHA2.py contains code for algorithms described in NIST.FIPS.180-4
+sha2.py contains code for algorithms described in NIST.FIPS.180-4, including SHA1 and SHA2 family
 
-SHA3.py contains code for algorithms described in NIST.FIPS.202
+sha3.py contains code for algorithms described in NIST.FIPS.202, including SHAKE and SHA3 family
 
-shatest.py runs SHA2 and SHA3 with various test vectors and prints the results
+shatest.py runs SHA1, SHA2, and SHA3 with various test vectors and prints the results
 
 bitstring.py implements the bitstring class whose instances are each a sequence of bits,<br>
 indexed starting at 0.
@@ -59,12 +61,10 @@ In the bitstring class, the following functions are defined:
 <tr><td> .trunc(n) </td><td>equivalent to [:n], but checks that n <= ._l</td></tr>
 </table>
 
-bitstring.py also implements the following functions:
+sha3.py also implements the following function:
 <table>
-<tr><td> c2bs()</td><td> converts a character to an 8-bit bitstring</td></tr>
-<tr><td> s2bs()</td><td> converts a string to a bitstring, using c2bs</td></tr>
 <tr><td> b3x()</td><td> takes a bitstring and produces a new bitstring by reversing each sequence of 8 bits, with any remaining bits also reversed;
    this can be used to compensate for the little-endian specification of SHA3 (see shatest.py)</td></tr>
 </table>
 
-bitstring.py also implements the plane class, specifically for SHA3
+sha3.py also implements the plane class
