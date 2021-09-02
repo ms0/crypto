@@ -16,7 +16,9 @@ shatest.py runs SHA1, SHA2, and SHA3 with various test vectors and prints the re
 bitstring.py implements the bitstring class whose instances are each a sequence of bits,<br>
 indexed starting at 0.
 
-The constructor can create a bitstring instance from a bitstring (a copy),<br>
+Use python help for more current and complete documentation.
+
+The bitstring constructor can create a bitstring instance from a bitstring (a copy),<br>
 a string (converting each character c to ord(c) and assuming it to be 8 bits long),<br>
 or an integer (with big-endian bit numbering) together with a number of bits.
 
@@ -58,7 +60,7 @@ In the bitstring class, the following functions are defined:
    <td>returns the bitstring resulting from concatenating the bitstring with the sequence of bits and bitstrings</td></tr>
 <tr><td> .tacnoc(sequence of bitstrings and 0s and 1s)</td>
    <td>returns the bitstring resulting from concatenating the reversed sequence of bits and bitstrings with the bitstring</td></tr>
-<tr><td> .trunc(n) </td><td>equivalent to [:n], but checks that n <= ._l</td></tr>
+<tr><td> .trunc(n) </td><td>equivalent to [:n] if 0 <= n <= ._l, else if n >= 0, concatenate 0s so resulting length is always exactly n</td></tr>
 </table>
 
 sha3.py also implements the following function:
