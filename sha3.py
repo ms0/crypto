@@ -40,14 +40,27 @@ class sharray(object) :
     return 'sharray('+repr(self.x)+')';
 
   def __getitem__(self,key) :
-    """Get the keyth bit of state array self; key is x,y,z"""
+    """Get the keyth bit of state array self; key is x,y,z
+    If z is a slice, return the corresponding bitstring"""
     x,y,z = key;
-    return int(self.x[self.x._l//25*(5*y+x)+z]);
+    l = self.x._l//25;
+    if isinstance(z,slice) :
+      s = z.indices(l);
+      w = l*(5*y+x);
+      return self.x[w+s[0]:w+s[1]:s[2]];
+    return int(self.x[l*(5*y+x)+z]);
 
   def __setitem__(self,key,b) :
-    """Set the keyth bit of state array self; key is x,y,z"""
+    """Set the keyth bit of state array self; key is x,y,z
+    If z is a slice, b should be a bitstring"""
     x,y,z = key;
-    self.x[self.x._l//25*(5*y+x)+z] = b;
+    l = self.x._l//25;
+    if isinstance(z,slice) :
+      s = z.indices(l);
+      w = l*(5*y+x)
+      self.x[w+s[0]:w+s[1]:s[2]] = b;
+      return;
+    self.x[l*(5*y+x)+z] = b;
 
   def plane(self,i) :
     """Return a copy of the ith plane of state array self"""
@@ -118,30 +131,25 @@ def theta(A) :
   return A;
 
 def rho(A) :
-  w = A.x._l//25;
   Z = sharray(A);
   x,y = 1,0;
   for t in xrange(24) :
-    for z in xrange(w) :
-      Z[x,y,z] = A[x,y,(z-(t+1)*(t+2)//2)%w];
+    Z[x,y,:] = A[x,y,:]>>((t+1)*(t+2)//2);
     x,y = y,(2*x+3*y)%5;
   return Z;
 
 def pi(A) :
-  w = A.x._l//25;
   Z = sharray(A);
   for x in xrange(5) :
     for y in xrange(5) :
-      for z in xrange(w) :
-        Z[x,y,z] = A[(x+3*y)%5,x,z];
+      Z[x,y,:] = A[(x+3*y)%5,x,:];
   return Z;
 
 def chi(A) :
   Z = sharray(A);
   for x in xrange(5) :
     for y in xrange(5) :
-      for z in xrange(A.x._l//25) :
-        Z[x,y,z] ^= (A[(x+1)%5,y,z] ^ 1) & A[(x+2)%5,y,z];
+      Z[x,y,:] ^= ~A[(x+1)%5,y,:] & A[(x+2)%5,y,:];
   return Z;
 
 rc = 1;
@@ -157,8 +165,7 @@ def iota(A,i) :    # i is the round number
   RC = bitstring(0,w);
   for j in xrange(l+1) :
     RC[(1<<j)-1] = (rc >> (255-(j+7*i)%255))&1;
-  for z in xrange(w) :
-    Z[0,0,z] ^= RC[z];
+  Z[0,0,:] ^= RC;
   return Z;
 
 def Rnd(A,i) :    # i is the round number
