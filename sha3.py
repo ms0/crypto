@@ -44,23 +44,23 @@ class sharray(object) :
     If z is a slice, return the corresponding bitstring"""
     x,y,z = key;
     l = self.x._l//25;
+    w = l*(5*y+x);
     if isinstance(z,slice) :
       s = z.indices(l);
-      w = l*(5*y+x);
       return self.x[w+s[0]:w+s[1]:s[2]];
-    return int(self.x[l*(5*y+x)+z]);
+    return int(self.x[w+z]);
 
   def __setitem__(self,key,b) :
     """Set the keyth bit of state array self; key is x,y,z
     If z is a slice, b should be a bitstring"""
     x,y,z = key;
     l = self.x._l//25;
+    w = l*(5*y+x)
     if isinstance(z,slice) :
       s = z.indices(l);
-      w = l*(5*y+x)
       self.x[w+s[0]:w+s[1]:s[2]] = b;
       return;
-    self.x[l*(5*y+x)+z] = b;
+    self.x[w+z] = b;
 
   def plane(self,i) :
     """Return a copy of the ith plane of state array self"""
