@@ -18,7 +18,7 @@ void rc4init (    // initialize for encryption / decryption
   uint8_t *key,
   uint16_t length
 ) {
-  uint8_t t, i = 0, j = 0, k = 0;
+  uint8_t t, i = 0, k = 0;
   do s[i]=i; while (++i);
   do t = s[i], s[i] = s[k += key[i%length] + t], s[k] = t; while (++i);
   x = y = 0;
