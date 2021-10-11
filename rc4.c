@@ -1,5 +1,5 @@
 /* RC4 description:
-   initialize the state to the identity permutation, then
+   initialize the state array s to the identity permutation, then
    for i from 0 thru 255 and cycling thru the octets of the key in order:
     swap the ith element with the kth element, where
      k has been incremented by the current key octet and by the ith element
@@ -12,28 +12,27 @@
 
 #include <stdint.h>
 
-static uint8_t state[256], x, y;    // 258 octets of state information
+static uint8_t s[256], x, y;    // 258 octets of state information
 
 void rc4init (    // initialize for encryption / decryption
   uint8_t *key,
   uint16_t length
 ) {
   uint8_t t, i = 0, j = 0, k = 0;
-  do state[i]=i; while (++i);
-  do t = state[i], state[i] = state[k += key[j] + t], state[k] = t;
-  while (j = (j+1)%length, ++i);
+  do s[i]=i; while (++i);
+  do t = s[i], s[i] = s[k += key[i%length] + t], s[k] = t; while (++i);
   x = y = 0;
 }
 
 uint8_t rc4step () {    // return next pseudo-random octet
   uint8_t t;
-  t = state[y += state[++x]], state[y] = state[x], state[x] = t;
-  return (state[t += state[y]]);
+  t = s[y += s[++x]], s[y] = s[x], s[x] = t;
+  return (s[t += s[y]]);
 }
 
 uint8_t rc4back () {    // step back, return last pseudo-random octet
   uint8_t t, u, v, w;
-  t = state[x], u = state[y], w = state[v = t + u];
-  state[x--] = u, state[y] = t, y -= u;
+  t = s[x], u = s[y], w = s[v = t + u];
+  s[x--] = u, s[y] = t, y -= u;
   return w;
 }
