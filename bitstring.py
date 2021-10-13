@@ -512,7 +512,9 @@ def __rsub__(self,other) :
 
 
 def __getitem__(self,key) :
-  """Return bitstring gotten by concatenating the indexed portion(s) of self"""
+  """Return bitstring gotten by concatenating the indexed portion(s) of self,
+but if key is an int, return the indexed bit as an int"""
+  bit = isint(key);
   if not isinstance(key,tuple) :
     key = (key,);
   B = self._B;
@@ -562,7 +564,7 @@ def __getitem__(self,key) :
           n += 1;
     else :
       raise TypeError('bitstring index not int or slice');
-  return type(self)(x,n);
+  return x if bit else type(self)(x,n);
 
 def __setitem__(self,key,value) :    # this makes bitstring mutable!
   """Set the specified portion(s) of key from successive bits of value"""
