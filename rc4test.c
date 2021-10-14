@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -17,6 +18,8 @@ void printmaerts(uint n) {
   printf("\n");	
 }
 
+char *rs = "This is not some random string? ";    // 32 octets
+
 int main() {
   printstream("Key",40);
   printmaerts(40);
@@ -24,4 +27,24 @@ int main() {
   printmaerts(40);
   printstream("Secret",40);
   printmaerts(40);
+  uint8_t s[256];
+  int i;
+  for (i=0; i<256; ++i) s[i] = rs[i%32];
+  rc4init(s,32);
+  uint8_t *a = (uint8_t *)malloc(1<<20);
+  for (i=0; i < 1<<20; ++i) a[i] = rc4step();
+  while (i--) {
+    if (a[i] != rc4back()) {
+      printf("failed at index %d",i);
+      break;
+    }
+  }
+  rc4init(s,256);
+  for (i=0; i < 1<<20; ++i) {
+    if (a[i] != rc4step()) {
+      printf("failed at index %d",i);
+      break;
+    }
+  }
+  free(a);
 }

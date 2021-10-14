@@ -14,10 +14,7 @@
 
 static uint8_t s[256], x, y;    // 258 octets of state information
 
-void rc4init (    // initialize for encryption / decryption
-  uint8_t *key,
-  uint16_t length
-) {
+void rc4init (uint8_t *key, uint16_t length) {    // initialize state
   uint8_t t, i = 0, k = 0;
   do s[i]=i; while (++i);
   do t = s[i], s[i] = s[k += key[i%length] + t], s[k] = t; while (++i);
@@ -25,14 +22,13 @@ void rc4init (    // initialize for encryption / decryption
 }
 
 uint8_t rc4step () {    // return next pseudo-random octet
-  uint8_t t;
-  t = s[y += s[++x]], s[y] = s[x], s[x] = t;
-  return (s[t += s[y]]);
+  uint8_t t, u;
+  t = s[y += s[++x]], s[y] = u = s[x], s[x] = t;
+  return (s[t += u]);
 }
 
 uint8_t rc4back () {    // step back, return last pseudo-random octet
-  uint8_t t, u, v, w;
-  t = s[x], u = s[y], w = s[v = t + u];
-  s[x--] = u, s[y] = t, y -= u;
-  return w;
+  uint8_t t, u, v;
+  t = s[x], u = s[y], v = s[v = t + u], s[x--] = u, s[y] = t, y -= u;
+  return v;
 }
