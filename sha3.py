@@ -59,8 +59,8 @@ class sharray(object) :
     if isinstance(z,slice) :
       s = z.indices(l);
       self.x[w+s[0]:w+s[1]:s[2]] = b;
-      return;
-    self.x[w+z] = b;
+    else :
+      self.x[w+z] = b;
 
   def plane(self,i) :
     """Return a copy of the ith plane of state array self"""
@@ -96,18 +96,29 @@ class plane(object) :
     return 'plane('+repr(self.x)+')';
 
   def __getitem__(self,key) :
-    """Return the keyth bit of plane self, addressed as x,z"""
+    """Return the keyth bit of plane self, addressed as x,z
+    If z is a slice, return the corresponding bitstring"""
     x,z = key;
     s = self.x;
     m = s._l//5;
-    return int(s[m*x+z]);
+    w = m*x;
+    if isinstance(z,slice) :
+      t = z.indices(m);
+      return s[w+t[0]:w+t[1]:t[2]];
+    return int(s[w+z]);
 
   def __setitem__(self,key,b) :
-    """Set the keyth bit of plane self to b, addressed as x,z"""
+    """Set the keyth bit of plane self to b, addressed as x,z
+    If z is a slice, b should be a bitstring"""
     x,z = key;
     s = self.x;
     m = s._l//5;
-    s[m*x+z] = b;
+    w = m*x;
+    if isinstance(z,slice) :
+      t = z.indices(m);
+      s[w+t[0]:w+t[1]:t[2]] = b;
+    else :
+      s[w+z] = b;
 
   def __xor__(self,other) :
     """Bitwise xor other to self, both planes; left plane is munged!"""
@@ -124,10 +135,9 @@ def theta(A) :
   C = A.plane(0) ^ A.plane(1) ^ A.plane(2) ^ A.plane(3) ^ A.plane(4);
   w = A.x._l//25;    # lane size
   for x in xrange(5) :
-    for z in xrange(w) :
-      Dxz = C[(x-1)%5,z] ^ C[(x+1)%5,(z-1)%w];
-      for y in xrange(5) :
-        A[x,y,z] ^= Dxz;
+    Dx = C[(x-1)%5,:]^(C[(x+1)%5,:]>>1);
+    for y in xrange(5) :
+      A[x,y,:] ^= Dx;
   return A;
 
 def rho(A) :
