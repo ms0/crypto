@@ -39,6 +39,18 @@ class sharray(object) :
     """Return a string representing sharray self"""
     return 'sharray('+repr(self.x)+')';
 
+  def __eq__(self,other) :
+    """Return True iff self and other are sharrays with same content"""
+    return type(self) == type(other) and self.x == other.x;
+
+  def __ne__(self,other) :
+    """Return False iff self and other are sharrays with same content"""
+    return type(self) != type(other) or self.x != other.x;
+
+  def __len__(self) :
+    """Return the number of bits in self"""
+    return self.x._l;
+
   def __getitem__(self,key) :
     """Get the keyth bit of state array self; key is x,y,z
     If z is a slice, return the corresponding bitstring"""
@@ -133,7 +145,6 @@ class plane(object) :
 
 def theta(A) :
   C = A.plane(0) ^ A.plane(1) ^ A.plane(2) ^ A.plane(3) ^ A.plane(4);
-  w = A.x._l//25;    # lane size
   for x in xrange(5) :
     Dx = C[(x-1)%5,:]^(C[(x+1)%5,:]>>1);
     for y in xrange(5) :
@@ -180,6 +191,38 @@ def iota(A,i) :    # i is the round number
 
 def Rnd(A,i) :    # i is the round number
   return iota(chi(pi(rho(theta(A)))),i)
+
+# inverse permutations:
+
+iiota = iota
+
+def ichi(A) :
+  for i in xrange(3) :
+    A = chi(A)
+  return A;
+
+def ipi(A) :
+  Z = sharray(A);
+  for x in xrange(5) :
+    for y in xrange(5) :
+      Z[(x+3*y)%5,x,:] = A[x,y,:];
+  return Z;
+
+def irho(A) :
+  Z = sharray(A);
+  x,y = 1,0;
+  for t in xrange(24) :
+    Z[x,y,:] = A[x,y,:]<<((t+1)*(t+2)//2);
+    x,y = y,(2*x+3*y)%5;
+  return Z;
+
+def itheta(A) :
+  for i in xrange(3*A.x._l//25-1) :
+    A = theta(A);
+  return A;
+
+def iRnd(A,i) :
+  return itheta(irho(ipi(ichi(iiota(A,i)))));
 
 def Keccak_p(b,n) :    # b bit strings, n rounds
   w = b//25;
