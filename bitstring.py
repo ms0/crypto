@@ -4,45 +4,7 @@ __all__ = ['bitstrings']
 
 # big-endian version implemented with list of ints
 
-import sys
-
-if sys.version_info[0] < 3 :
-
-  def isint(x) :
-    """Return True iff an integer"""
-    return isinstance(x,(int,long));
-
-  lmap = map;
-  
-else :
-
-  def isint(x) :
-    """Return True iff an integer"""
-    return isinstance(x,int);
-
-  def lmap(f,*x) :
-    """Return list(map(f,*x))"""
-    return list(map(f,*x));
-
-  xrange = range;
-
-try :
-  int.bit_length;
-  bit_length = lambda n : n.bit_length();
-except Exception :
-  import math
-  def bit_length(n) :
-    n = abs(n);
-    b = 0;
-    while n :
-      try :
-        l = int(math.log(n,2));
-        while n >> l : l += 1;
-      except OverflowError :
-        l = sys.float_info.max_exp-1;
-      b += l
-      n >>= l;
-    return b;
+from conversions import isint, lmap, xrange, bit_length
 
 inf = float('inf');
 

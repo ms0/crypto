@@ -1,9 +1,4 @@
-import sys
-if sys.version_info[0] < 3 :
-  lmap = map;
-else :
-  xrange = range;
-  lmap = lambda *x: list(map(*x))
+from conversions import xrange, lmap
 
 class rc4(object) :
 
@@ -51,6 +46,5 @@ class rc4(object) :
     self._y = (self._y - u) & 0xff;
     return v;
 
-  if sys.version_info[0] < 3 :
-    next = __next__
-    prev = __prev__
+  next = __next__
+  prev = __prev__

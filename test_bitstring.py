@@ -1,10 +1,7 @@
 from __future__ import print_function
 from __future__ import division
 
-import sys
-
-if sys.version_info>(3,) :
-  xrange = range;
+from conversions import xrange
 
 from random import Random, randrange, randint
 from itertools import chain

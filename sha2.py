@@ -1,19 +1,13 @@
 # SHA1 and 2
 
-import sys
-
-if sys.version_info[0] < 3 :
-  lmap = map;
-else :
-  lmap = lambda *x: list(map(*x));
-  xrange = range;
+from conversions import xrange, lmap
 
 from bitstring import bitstrings
 bitstring = bitstrings(64);
 
 nprimes = 80;
 from rational import *
-from ffield import isprime
+from numbers import isprime
 
 def primes() :
   yield 2;

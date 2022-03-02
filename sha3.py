@@ -1,10 +1,6 @@
 # SHA-3 implementation
 
-import sys
-
-if sys.version_info[0] >= 3 :
-  xrange = range;
-
+from conversions import xrange
 from bitstring import bitstrings
 bitstring=bitstrings(1600);
 
