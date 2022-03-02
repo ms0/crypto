@@ -1,11 +1,13 @@
 # crypto
 Crypto-related python routines, for exposition, not performance
 
-Dependencies: rational.py and ffield.py from pymath repository (for computing constants in SHA2.py, for various uses in rsa.py)
+Dependencies: rational.py, conversions.py, numbers.py from pymath repository (for computing constants in SHA2.py, for various uses in rsa.py)
 
 rc4.py contains code for the RC4 one-time pad generator
 
 rsa.py contains code for creating and using RSA key pairs
+
+share.py is copied from the pymath repository; it demonstrates secret sharing; see secretsharing.html in pymath repository
 
 sha2.py contains code for algorithms described in NIST.FIPS.180-4, including SHA1 and SHA2 family
 
