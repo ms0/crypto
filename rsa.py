@@ -3,18 +3,14 @@
 # encrypt
 # decrypt
 
-from rational import gcd, sqrt
-from ffield import isprime, bit_length
+from rational import sqrt
+from conversions import gcd, bit_length, xrange
+from numbers import isprime
 
 try:
   randrange
 except Exception :
   from random import randrange
-
-try:
-  xrange
-except Exception :
-  xrange = range
 
 def xgcd(a,b) :
   """Return g,c,d where g=ca+db is the gcd of a and b"""
@@ -38,7 +34,9 @@ Instance variables:
   e: the RSA public key
   _d: the RSA private key
 Methods:
-  __init__, encrypt, decrypt, _pq"""
+  __init__, encrypt, decrypt
+Properties:
+  _pq"""
 
   def __init__(self,m,e=1+(1<<16)) :
     """Create an RSA modulus < m; try to use suggested public key e; compute private key"""
@@ -75,6 +73,7 @@ Methods:
     """Return decrypted m"""
     return pow(m,self._d,self.n);
 
+  @property
   def _pq(self) :
     """From public and private keys, compute and return (p,q)"""
     de1 = self._d*self.e-1;    # multiple of reduced totient
