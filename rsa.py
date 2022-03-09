@@ -5,7 +5,7 @@
 
 from rational import sqrt
 from conversions import gcd, bit_length, xrange
-from numbers import isprime
+from numfuns import isprime
 
 try:
   randrange

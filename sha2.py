@@ -7,7 +7,7 @@ bitstring = bitstrings(64);
 
 nprimes = 80;
 from rational import *
-from numbers import isprime
+from numfuns import isprime
 
 def primes() :
   yield 2;
