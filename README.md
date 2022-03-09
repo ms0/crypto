@@ -1,7 +1,7 @@
 # crypto
 Crypto-related python routines, for exposition, not performance
 
-Dependencies: rational.py, conversions.py, numbers.py from pymath repository (for computing constants in SHA2.py, for various uses in rsa.py)
+Dependencies: rational.py, conversions.py, numfuns.py from pymath repository (for computing constants in SHA2.py, for various uses in rsa.py)
 
 rc4.py contains code for the RC4 one-time pad generator
 
