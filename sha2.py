@@ -99,6 +99,9 @@ s641 = lambda x : (x>>19)^(x>>61)^((x&~0x3f)>>6);
 SHA224 = lambda M: SHA256(M,H224).itrunc(224);
 
 def SHA2(M,H0,m,w,n,S0,S1,s0,s1) :
+  """Compute the SHA2 hash of message M, using initial value H0,
+     block length m bits, word size w bits, number of rounds n,
+     and word-mangling functions S0, S1, s0, s1"""
   wpb = m//w;
   K = lmap(lambda x: x >> (64-w), K2[:n]);
   M = pad(M,2*w).split(w);
