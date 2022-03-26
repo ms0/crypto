@@ -122,7 +122,8 @@ def _fillr(self,b,other) :
 #   (._x[-1]>>(._B-1-._l%._B))&1
 
 def __init__(self,*args) :
-  """Create a bitstring from an int and a length, or from another bitstring"""
+  """Create a bitstring from an int and a length, or from a string,
+     or from a bytes instance, or from another bitstring"""
   if not args :
     self._x = self._l = 0;
     return;
@@ -137,6 +138,14 @@ def __init__(self,*args) :
       if B == 8 :
         self._l = l = len(a)<<3;
         self._x = lmap(ord,a);
+        if l <= B : self._x = l and self._x[0];
+        return;
+      else :
+        a = _bitstring[8](a);
+    elif isinstance(a, bytes) :
+      if B == 8 :
+        self._l = l = len(a)<<3;
+        self._x = [x for x in a];
         if l <= B : self._x = l and self._x[0];
         return;
       else :
@@ -882,6 +891,14 @@ def __split__(self,C) :
       z.itrunc(l);
   return x;
 
+def __bytes__(self,C=-8) :
+  """Return a bytes instance with equivalent hex value"""
+  return bytes(map(int,self.split(C)));
+
+def __string__(self,C=-8) :
+  """Return a string s where self == bitstring(s)"""
+  return ''.join(map(chr,map(int,self.split(C))));
+
 ################################################################
 
 _bitstring = {};  # chunk -> bitstring
@@ -946,6 +963,8 @@ class bitstrings(type) :
              trunc=__trunc__,
              split=__split__,
              copy=__copy__,
+             bytes=__bytes__,
+             string=__string__,
            );
     name = 'bitstring%d'%(chunk) if chunk < inf else 'bitstring';
     _bitstring[chunk] = b = type.__new__(cls,name,(),d);
