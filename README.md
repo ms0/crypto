@@ -9,6 +9,8 @@ rsa.py contains code for creating and using RSA key pairs
 
 share.py is copied from the pymath repository; it demonstrates secret sharing; see secretsharing.html in pymath repository
 
+md5.py contains code for the deprecated MD5 hash algorithm described in RFC1321
+
 sha2.py contains code for algorithms described in NIST.FIPS.180-4, including SHA1 and SHA2 family
 
 sha3.py contains code for algorithms described in NIST.FIPS.202, including SHAKE and SHA3 family
