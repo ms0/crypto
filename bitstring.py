@@ -121,59 +121,63 @@ def _fillr(self,b,other) :
 # if ._x is a list, the rightmost bit of the bitstring is
 #   (._x[-1]>>(._B-1-._l%._B))&1
 
-def __init__(self,*args) :
-  """Create a bitstring from an int and a length, or from a string,
-     or from a bytes instance, or from another bitstring"""
-  if not args :
+def __init__(self,a=None,b=None) :
+  """Create a bitstring from int a and length abs(b), or
+     from string, bytes instance, or bitstring a.
+     For int a, if b is negative, the bits of a are reversed.
+     For strings, bytes, and bitstrings, if b, a is reversed."""
+  if a is None :
     self._x = self._l = 0;
     return;
   B = self._B;
-  if len(args) == 1 :
-    a = args[0];
-    if isinstance(a,type(self)) :
-      self._l = l = a._l;
-      self._x = a._x[:] if l > B else a._x;
+  if isinstance(a,type(self)) :
+    self._l = l = a._l;
+    self._x = a._x[:] if l > B else a._x;
+    if b : self *= -1;
+    return;
+  if isinstance(a, str) :
+    if B == 8 :
+      self._l = l = len(a)<<3;
+      self._x = lmap(ord,reversed(a) if b else a);
+      if l <= B : self._x = l and self._x[0];
       return;
-    if isinstance(a, str) :
-      if B == 8 :
-        self._l = l = len(a)<<3;
-        self._x = lmap(ord,a);
-        if l <= B : self._x = l and self._x[0];
-        return;
-      else :
-        a = _bitstring[8](a);
-    elif isinstance(a, bytes) :
-      if B == 8 :
-        self._l = l = len(a)<<3;
-        self._x = [x for x in a];
-        if l <= B : self._x = l and self._x[0];
-        return;
-      else :
-        a = _bitstring[8](a);
-    if isinstance(type(a),bitstrings) :
-      self._l = l = a._l;
-      if l <= B :
-        self._x = __int__(a);
-        return;
-      if l <= a._B :
-        self._x = _chunkify(a._x,l,B);
-        return;
-      self._x = [0]*((l+B-1)//B);
-      return _fillr(self,0,a);
-    else : raise TypeError('single arg must be bitstring')
-  if len(args) > 2 :
-    raise TypeError('too many args');
-  x,l = args;
-  if not isint(x) :
+    else :
+      a = _bitstring[8](a,b);
+      b = None;
+  elif isinstance(a, bytes) :
+    if B == 8 :
+      self._l = l = len(a)<<3;
+      self._x = [x for x in (reversed(a) if b else a)];
+      if l <= B : self._x = l and self._x[0];
+      return;
+    else :
+      a = _bitstring[8](a,**kwargs);
+  if isinstance(type(a),bitstrings) :
+    self._l = l = a._l;
+    if l <= B :
+      self._x = __int__(a);
+      if b : self *= -1;
+      return;
+    if l <= a._B :
+      self._x = _chunkify(a._x,l,B);
+      if b : self *= -1;
+      return;
+    self._x = [0]*((l+B-1)//B);
+    _fillr(self,0,a);
+    if b : self *= -1;
+    return;
+  if not isint(a) :
     raise TypeError('value must be integer');
-  if not isint(l) or l < 0 :
-    raise TypeError('length must be nonnegative');
-  x &= (1<<l)-1;
+  if not isint(b) :
+    raise TypeError('length must be integer');
+  l = abs(b);
+  a &= (1<<l)-1;
   self._l = l;    # number of bits
   if l <= B :
-    self._x = x;
+    self._x = a;
   else :
-    self._x = _chunkify(x,l,B);
+    self._x = _chunkify(a,l,B);
+  if b < 0 : self *= -1;
 
 def __copy__(self) :
   """Return a copy of self"""
