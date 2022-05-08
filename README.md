@@ -22,15 +22,19 @@ indexed starting at 0.
 
 Use python help for more current and complete documentation.
 
-The bitstring constructor can create a bitstring instance from a bitstring (a copy),<br>
-a string (converting each character c to ord(c) and assuming it to be 8 bits long),<br>
-or an integer (with big-endian bit numbering) together with a number of bits.
+The bitstring constructor can create a bitstring instance from a bitstring (a copy)<br>
+with the bits reversed if the optional second arg is nonzero,<br>
+a string (converting each character c to ord(c) and assuming it to be 8 bits long)<br>
+with the octets reversed if the optional second arg is nonzero,<br>
+a bytes instance with an optional second arg to reverse the octet order,<br>
+or an integer (with big-endian bit numbering) together with a number of bits<br>
+which if negative uses little-endian bit numbering (i.e., reverses the bit order).<br>
 
 Examples:<br>
 bitstring('abc') -> 011000010110001001100011 [printed as 0x616263]<br>
 bitstring(0x37,7) -> 0110111 [printed as 0x37]<br>
 
-bitstring instances have the following attributes:
+bitstring instances have the following attributes:<br>
 <table>
  <tr><td>.x</td><td>the bitstring interpreted as a big-endian integer</td></tr>
  <tr><td>._l</td><td>the number of bits in the bitstring (same as len())</td></tr>
@@ -64,7 +68,7 @@ In the bitstring class, the following functions are defined:
 <tr><td></td><td>if n < 0, truncate from the left or concatenate 0s on the left so that the resulting length is always exactly -n</td></tr>
 </table>
 
-sha3.py also implements the following function:
+sha3.py also implements the following function:<br>
 <table>
 <tr><td> b3x()</td><td> takes a bitstring and produces a new bitstring by reversing each sequence of 8 bits, with any remaining bits also reversed;
    this can be used to compensate for the little-endian specification of SHA3 (see shatest.py)</td></tr>
