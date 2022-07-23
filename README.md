@@ -1,13 +1,11 @@
 # crypto
 Crypto-related python routines, for exposition, not performance
 
-Dependencies: rational.py, conversions.py, numfuns.py from pymath repository (for computing constants in SHA2.py, for various uses in rsa.py)
+Dependencies: from the msmath package: bitstring.py, rational.py, conversions.py, numfuns.py
 
 rc4.py contains code for the RC4 one-time pad generator
 
 rsa.py contains code for creating and using RSA key pairs
-
-share.py is copied from the pymath repository; it demonstrates secret sharing; see secretsharing.html in pymath repository
 
 md5.py contains code for the deprecated MD5 hash algorithm described in RFC1321
 
@@ -16,9 +14,6 @@ sha2.py contains code for algorithms described in NIST.FIPS.180-4, including SHA
 sha3.py contains code for algorithms described in NIST.FIPS.202, including SHAKE and SHA3 family
 
 shatest.py runs SHA1, SHA2, and SHA3 with various test vectors and prints the results
-
-bitstring.py implements the bitstring class whose instances are each a sequence of bits,<br>
-indexed starting at 0.
 
 Use python help for more current and complete documentation.
 
