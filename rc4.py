@@ -1,4 +1,4 @@
-from conversions import xrange, lmap
+from msmath.conversions import xrange, lmap
 
 class rc4(object) :
 

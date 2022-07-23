@@ -2,12 +2,12 @@
 
 __all__ = ['MD5']
 
-from bitstring import bitstrings
+from msmath.bitstring import bitstrings
 bitstring = bitstrings(32)
 
-from rational import sin
+from msmath.rational import sin
 
-from conversions import xrange
+from msmath.conversions import xrange
 
 T = tuple(bitstring(int(abs(sin(i+1))<<32),32) for i in xrange(64));
 

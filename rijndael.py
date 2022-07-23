@@ -9,11 +9,11 @@
 """
 
 
-from conversions import unpack,pack,xrange
-from numfuns import m2mul
-from ffield import ffield
-from poly import polynomial
-from bitstring import bitstrings
+from msmath.conversions import unpack,pack,xrange
+from msmath.numfuns import m2mul
+from msmath.ffield import ffield
+from msmath.poly import polynomial
+from msmath.bitstring import bitstrings
 
 bitstring = bitstrings(32);
 

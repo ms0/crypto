@@ -1,13 +1,13 @@
 # SHA1 and 2
 
-from conversions import xrange, lmap
+from msmath.conversions import xrange, lmap
 
-from bitstring import bitstrings
+from msmath.bitstring import bitstrings
 bitstring = bitstrings(64);
 
 nprimes = 80;
-from rational import *
-from numfuns import isprime
+from msmath.rational import *
+from msmath.numfuns import isprime
 
 def primes() :
   yield 2;

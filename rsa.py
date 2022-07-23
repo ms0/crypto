@@ -3,9 +3,9 @@
 # encrypt
 # decrypt
 
-from rational import sqrt
-from conversions import gcd, bit_length, xrange
-from numfuns import isprime
+from msmath.rational import sqrt
+from msmath.conversions import gcd, bit_length, xrange
+from msmath.numfuns import isprime
 
 try:
   randrange

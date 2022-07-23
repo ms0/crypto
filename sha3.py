@@ -1,7 +1,7 @@
 # SHA-3 implementation
 
-from conversions import xrange
-from bitstring import bitstrings
+from msmath.conversions import xrange
+from msmath.bitstring import bitstrings
 bitstring=bitstrings(1600);
 
 from math import log
