@@ -7,14 +7,7 @@ bitstring = bitstrings(64);
 
 nprimes = 80;
 from msmath.rational import *
-from msmath.numfuns import isprime
-
-def primes() :
-  yield 2;
-  p = 3;
-  while True :
-    if isprime(p) : yield p;
-    p += 2;
+from msmath.numfuns import primes
 
 p = primes();
 P = [next(p) for i in xrange(nprimes)]
